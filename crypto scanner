@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>크립토 루트 - 검색 결과</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 기본 리셋 및 공통 스타일 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f8f9fb;
+      color: #1a1a1a;
+    }
+
+    /* 모바일 프레임 스타일 */
+    .phone {
+      position: relative;
+      width: 360px;
+      height: 720px;
+      background-color: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+      border: none;
+    }
+
+    .content {
+      height: 100%;
+      overflow-y: auto;
+      padding-bottom: 70px;
+    }
+
+    /* 헤더 스타일 */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: white;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .back-button {
+      font-size: 18px;
+      color: #111;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+      float: left;
+      margin-right: 10px;
+    }
+
+    .back-button:hover {
+      background-color: #f0f0f0;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d2939;
+      margin-bottom: 4px;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: #667085;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .refresh-time {
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      color: #667085;
+      margin-left: auto;
+    }
+
+    .refresh-time i {
+      margin-right: 4px;
+      font-size: 10px;
+    }
+
+    /* 필터 메뉴 */
+    .filters {
+      display: flex;
+      padding: 12px 20px;
+      margin-bottom: 6px;
+      overflow-x: auto;
+      background-color: white;
+      gap: 10px;
+    }
+
+    .filter-button {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      background-color: #f9fafc;
+      border: 1px solid #eaecf0;
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #475467;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-button.active {
+      background-color: #27c19f;
+      color: white;
+      border-color: #27c19f;
+    }
+
+    .filter-button:hover:not(.active) {
+      background-color: #f0f2f5;
+      border-color: #d0d5dd;
+    }
+
+    /* 결과 요약 */
+    .results-summary {
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #475467;
+      background-color: #f9fafc;
+      border-bottom: 1px solid #eaecf0;
+    }
+
+    /* 경로 카드 */
+    .route-card {
+      margin: 16px 20px;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .route-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .route-exchanges {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d2939;
+      display: flex;
+      align-items: center;
+    }
+
+    .exchange-arrow {
+      margin: 0 6px;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .route-favorite {
+      color: #d1d5db;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .route-favorite.active {
+      color: #27c19f;
+    }
+
+    .route-tags {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .route-tag {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 10px;
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .route-tag.featured {
+      background-color: #EFF9F7;
+      color: #27c19f;
+    }
+
+    .route-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .route-time {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #667085;
+    }
+
+    .route-time i {
+      margin-right: 4px;
+      font-size: 12px;
+    }
+
+    .route-premium {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .premium-positive {
+      color: #ef4444;
+    }
+
+    .premium-negative {
+      color: #10b981;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .price-summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .price-title {
+      font-size: 12px;
+      color: #667085;
+    }
+
+    .price-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d2939;
+    }
+
+    .price-equivalent {
+      font-size: 12px;
+      color: #667085;
+      margin-top: 2px;
+      text-align: right;
+    }
+
+    .fees-summary {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #667085;
+      margin-bottom: 16px;
+    }
+
+    .fees-summary i {
+      margin-right: 4px;
+      font-size: 12px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-button {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-primary {
+      background-color: #27c19f;
+      color: white;
+    }
+
+    .action-primary:hover {
+      background-color: #229e83;
+    }
+
+    .action-secondary {
+      background-color: #f9fafc;
+      border: 1px solid #eaecf0;
+      color: #475467;
+    }
+
+    .action-secondary:hover {
+      background-color: #f0f2f5;
+      border-color: #d0d5dd;
+    }
+
+    /* 하단 네비게이션 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      background-color: white;
+      padding: 12px 0;
+      border-top: 1px solid #eaecf0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .nav-icon {
+      color: #667085;
+      font-size: 20px;
+    }
+
+    .nav-text {
+      font-size: 10px;
+      color: #667085;
+    }
+
+    .nav-item.active .nav-icon,
+    .nav-item.active .nav-text {
+      color: #27c19f;
+    }
+
+    /* 실시간 갱신 뱃지 */
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: #EFF9F7;
+      color: #27c19f;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+
+    .live-badge .dot {
+      width: 6px;
+      height: 6px;
+      background-color: #27c19f;
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.2;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* 반응형 조정 */
+    @media (max-width: 400px) {
+      .phone {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="content">
+      <!-- 헤더 -->
+      <div class="header">
+        <div class="back-button">
+          <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="header-title">업비트 → 바이낸스 (BTC)</div>
+        <div class="header-subtitle">
+          <span>2025년 5월 21일</span>
+          <div class="live-badge">
+            <div class="dot"></div>
+            <span>실시간</span>
+          </div>
+          <div class="refresh-time">
+            <i class="fas fa-sync-alt"></i>
+            <span>1분 전 업데이트</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 필터 메뉴 -->
+      <div class="filters">
+        <div class="filter-button active">
+          <i class="fas fa-sort-amount-down"></i>
+          <span>최저가</span>
+        </div>
+        <div class="filter-button">
+          <i class="fas fa-clock"></i>
+          <span>최단시간</span>
+        </div>
+        <div class="filter-button">
+          <i class="fas fa-star"></i>
+          <span>추천순</span>
+        </div>
+        <div class="filter-button">
+          <i class="fas fa-filter"></i>
+          <span>필터</span>
+        </div>
+      </div>
+      
+      <!-- 결과 요약 -->
+      <div class="results-summary">
+        총 5개의 경로를 찾았습니다. 현재 BTC 김치 프리미엄은 2.17%입니다.
+      </div>
+      
+      <!-- 경로 카드 1 - 직항 -->
+      <div class="route-card">
+        <div class="card-header">
+          <div class="route-info">
+            <div class="route-exchanges">
+              <span>업비트</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>바이낸스</span>
+            </div>
+            <div class="route-favorite">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="route-tags">
+            <div class="route-tag featured">직항</div>
+            <div class="route-tag">인기 경로</div>
+          </div>
+          <div class="route-meta">
+            <div class="route-time">
+              <i class="far fa-clock"></i>
+              <span>예상 소요 시간: 약 15분</span>
+            </div>
+            <div class="route-premium premium-positive">
+              프리미엄 +2.17%
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-summary">
+            <div class="price-title">총 예상 비용</div>
+            <div>
+              <div class="price-value">0.00052 BTC</div>
+              <div class="price-equivalent">≈ ₩42,780</div>
+            </div>
+          </div>
+          <div class="fees-summary">
+            <i class="fas fa-info-circle"></i>
+            <span>출금 수수료 0.0005 BTC + 네트워크 수수료 0.00002 BTC</span>
+          </div>
+          <div class="card-actions">
+            <div class="action-button action-secondary">상세 보기</div>
+            <div class="action-button action-primary">바로 거래</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 경로 카드 2 - 경유 1회 -->
+      <div class="route-card">
+        <div class="card-header">
+          <div class="route-info">
+            <div class="route-exchanges">
+              <span>업비트</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>쿠코인</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>바이낸스</span>
+            </div>
+            <div class="route-favorite active">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="route-tags">
+            <div class="route-tag">경유 1회</div>
+            <div class="route-tag featured">최저 수수료</div>
+          </div>
+          <div class="route-meta">
+            <div class="route-time">
+              <i class="far fa-clock"></i>
+              <span>예상 소요 시간: 약 23분</span>
+            </div>
+            <div class="route-premium premium-positive">
+              프리미엄 +1.94%
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-summary">
+            <div class="price-title">총 예상 비용</div>
+            <div>
+              <div class="price-value">0.00047 BTC</div>
+              <div class="price-equivalent">≈ ₩38,540</div>
+            </div>
+          </div>
+          <div class="fees-summary">
+            <i class="fas fa-info-circle"></i>
+            <span>두 단계 거래 수수료 합산 (쿠코인 경유)</span>
+          </div>
+          <div class="card-actions">
+            <div class="action-button action-secondary">상세 보기</div>
+            <div class="action-button action-primary">바로 거래</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 경로 카드 3 - DEX 활용 -->
+      <div class="route-card">
+        <div class="card-header">
+          <div class="route-info">
+            <div class="route-exchanges">
+              <span>업비트</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>유니스왑</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>바이낸스</span>
+            </div>
+            <div class="route-favorite">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="route-tags">
+            <div class="route-tag">DEX 활용</div>
+            <div class="route-tag">스마트 라우팅</div>
+          </div>
+          <div class="route-meta">
+            <div class="route-time">
+              <i class="far fa-clock"></i>
+              <span>예상 소요 시간: 약 28분</span>
+            </div>
+            <div class="route-premium premium-negative">
+              역프리미엄 -0.52%
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-summary">
+            <div class="price-title">총 예상 비용</div>
+            <div>
+              <div class="price-value">0.00075 BTC</div>
+              <div class="price-equivalent">≈ ₩61,500</div>
+            </div>
+          </div>
+          <div class="fees-summary">
+            <i class="fas fa-info-circle"></i>
+            <span>가스비 포함 (이더리움 네트워크)</span>
+          </div>
+          <div class="card-actions">
+            <div class="action-button action-secondary">상세 보기</div>
+            <div class="action-button action-primary">바로 거래</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 경로 카드 4 - OTC 딜 -->
+      <div class="route-card">
+        <div class="card-header">
+          <div class="route-info">
+            <div class="route-exchanges">
+              <span>업비트</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>OTC마켓</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>바이낸스</span>
+            </div>
+            <div class="route-favorite">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="route-tags">
+            <div class="route-tag">OTC 거래</div>
+            <div class="route-tag featured">고액 거래 적합</div>
+          </div>
+          <div class="route-meta">
+            <div class="route-time">
+              <i class="far fa-clock"></i>
+              <span>예상 소요 시간: 약 60분</span>
+            </div>
+            <div class="route-premium premium-positive">
+              프리미엄 +1.25%
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-summary">
+            <div class="price-title">총 예상 비용</div>
+            <div>
+              <div class="price-value">0.00062 BTC</div>
+              <div class="price-equivalent">≈ ₩50,840</div>
+            </div>
+          </div>
+          <div class="fees-summary">
+            <i class="fas fa-info-circle"></i>
+            <span>OTC 브로커 수수료 0.8% 포함 (2BTC 이상 거래 시 적합)</span>
+          </div>
+          <div class="card-actions">
+            <div class="action-button action-secondary">상세 보기</div>
+            <div class="action-button action-primary">바로 거래</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 경로 카드 5 - P2P 거래 -->
+      <div class="route-card">
+        <div class="card-header">
+          <div class="route-info">
+            <div class="route-exchanges">
+              <span>업비트</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>P2P</span>
+              <i class="fas fa-long-arrow-alt-right exchange-arrow"></i>
+              <span>바이낸스</span>
+            </div>
+            <div class="route-favorite">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="route-tags">
+            <div class="route-tag">P2P 거래</div>
+            <div class="route-tag">신규 경로</div>
+          </div>
+          <div class="route-meta">
+            <div class="route-time">
+              <i class="far fa-clock"></i>
+              <span>예상 소요 시간: 약 45분</span>
+            </div>
+            <div class="route-premium premium-positive">
+              프리미엄 +2.05%
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-summary">
+            <div class="price-title">총 예상 비용</div>
+            <div>
+              <div class="price-value">0.00054 BTC</div>
+              <div class="price-equivalent">≈ ₩44,280</div>
+            </div>
+          </div>
+          <div class="fees-summary">
+            <i class="fas fa-info-circle"></i>
+            <span>P2P 거래 수수료 0.1% + 출금 수수료</span>
+          </div>
+          <div class="card-actions">
+            <div class="action-button action-secondary">상세 보기</div>
+            <div class="action-button action-primary">바로 거래</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 하단 네비게이션 -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon"><i class="fas fa-search"></i></div>
+        <div class="nav-text">검색</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon"><i class="fas fa-exchange-alt"></i></div>
+        <div class="nav-text">거래</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon"><i class="fas fa-bell"></i></div>
+        <div class="nav-text">알림</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon"><i class="fas fa-user"></i></div>
+        <div class="nav-text">내 정보</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
