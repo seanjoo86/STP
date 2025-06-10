@@ -1,0 +1,241 @@
+import React, { useState } from 'react';
+import { Search, Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+// 상태 배지 컴포넌트
+const StatusBadge = ({ status }) => {
+  const style = status === '상장' 
+    ? 'bg-green-100 text-green-800'
+    : 'bg-gray-100 text-gray-800';
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}>
+      {status}
+    </span>
+  );
+};
+
+// 메인 컴포넌트
+const ItemPriceManagement = () => {
+  const [activeTab, setActiveTab] = useState('items');
+  const [searchFilters, setSearchFilters] = useState({
+    itemName: '',
+    issuerName: '',
+    status: '',
+  });
+
+  // 샘플 데이터
+  const items = [
+    {
+      id: 'ITM001',
+      itemName: 'BTS-Dynamite',
+      issuerName: '뮤직카우',
+      assetName: '해외음악IP',
+      issuanceAmount: '1,000,000',
+      issueDate: '2024-01-15',
+      validPeriod: '2029-01-14',
+      status: '상장',
+      priceRule: {
+        limitUp: 30,
+        limitDown: 30,
+        basePrice: '전일종가',
+        tradingUnit: 10
+      }
+    },
+    {
+      id: 'ITM002',
+      itemName: 'Solar Panel A',
+      issuerName: '파이브노드',
+      assetName: '신재생에너지',
+      issuanceAmount: '500,000',
+      issueDate: '2024-01-16',
+      validPeriod: '2029-01-15',
+      status: '비상장',
+      priceRule: null
+    }
+  ];
+
+  // 필터링된 데이터
+  const filteredItems = items.filter(item => {
+    if (searchFilters.itemName && !item.itemName.includes(searchFilters.itemName)) return false;
+    if (searchFilters.issuerName && !item.issuerName.includes(searchFilters.issuerName)) return false;
+    if (searchFilters.status && item.status !== searchFilters.status) return false;
+    return true;
+  });
+
+  // 종목 목록 테이블
+  const ItemsTable = () => (
+    <div className="border rounded-lg overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">종목명</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">발행인명</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">기초자산명</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">발행량</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">시세 룰</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {filteredItems.map((item) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {item.itemName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.issuerName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.assetName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.issuanceAmount}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <StatusBadge status={item.status} />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.priceRule ? '설정됨' : '미설정'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  // 시세 룰 관리 테이블
+  const PriceRulesTable = () => (
+    <div className="border rounded-lg overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">종목명</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상한가(%)</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">하한가(%)</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">기준가격</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">거래단위</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {filteredItems.filter(item => item.priceRule).map((item) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {item.itemName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.priceRule.limitUp}%
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.priceRule.limitDown}%
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.priceRule.basePrice}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.priceRule.tradingUnit}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <Card className="max-w-6xl mx-auto">
+        <CardHeader>
+          <CardTitle>종목/시세정보 관리</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* 탭 */}
+          <div className="border-b mb-6">
+            <div className="flex gap-4">
+              <button
+                className={`px-4 py-2 font-medium ${
+                  activeTab === 'items' 
+                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setActiveTab('items')}
+              >
+                종목 관리
+              </button>
+              <button
+                className={`px-4 py-2 font-medium ${
+                  activeTab === 'priceRules' 
+                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setActiveTab('priceRules')}
+              >
+                시세 룰 관리
+              </button>
+            </div>
+          </div>
+
+          {/* 검색 필터 */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                종목명
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded"
+                value={searchFilters.itemName}
+                onChange={(e) => setSearchFilters({
+                  ...searchFilters,
+                  itemName: e.target.value
+                })}
+                placeholder="종목명 입력"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                발행인명
+              </label>
+              <input
+                type="text"
+                className="w-full p-2 border rounded"
+                value={searchFilters.issuerName}
+                onChange={(e) => setSearchFilters({
+                  ...searchFilters,
+                  issuerName: e.target.value
+                })}
+                placeholder="발행인명 입력"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                상태
+              </label>
+              <select
+                className="w-full p-2 border rounded"
+                value={searchFilters.status}
+                onChange={(e) => setSearchFilters({
+                  ...searchFilters,
+                  status: e.target.value
+                })}
+              >
+                <option value="">전체</option>
+                <option value="상장">상장</option>
+                <option value="비상장">비상장</option>
+              </select>
+            </div>
+          </div>
+
+          {/* 테이블 */}
+          {activeTab === 'items' ? <ItemsTable /> : <PriceRulesTable />}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ItemPriceManagement;
+
+// 종목 시세 곤리

@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { Database, HardDrive, History, CheckCircle, Search, Plus, Filter, ExternalLink } from 'lucide-react';
+
+const TabButton = ({ active, icon: Icon, label, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+      active 
+        ? 'bg-blue-50 text-blue-700 font-medium'
+        : 'text-gray-600 hover:bg-gray-50'
+    }`}
+  >
+    <Icon className="w-5 h-5" />
+    {label}
+  </button>
+);
+
+const StatusBadge = ({ status }) => {
+  const colors = {
+    active: 'bg-green-100 text-green-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    archived: 'bg-gray-100 text-gray-800'
+  };
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+const DataManagementDashboard = () => {
+  const [activeTab, setActiveTab] = useState('catalog');
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const renderDataCatalog = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="데이터 필드 검색..."
+              className="pl-10 pr-4 py-2 border rounded-lg w-64"
+            />
+          </div>
+          <button className="px-3 py-2 border rounded-lg text-gray-600 flex items-center gap-2">
+            <Filter className="w-4 h-4" />
+            필터
+          </button>
+        </div>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          신규 데이터 필드
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                필드명
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                데이터 타입
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                소스
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                상태
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                최종 수정일
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                작업
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {[
+              { id: 1, name: 'customer_id', type: 'STRING', source: 'CRM', status: 'active', lastModified: '2024-01-15' },
+              { id: 2, name: 'wallet_address', type: 'STRING', source: 'Blockchain', status: 'active', lastModified: '2024-01-14' },
+              { id: 3, name: 'transaction_amount', type: 'DECIMAL', source: 'Ledger', status: 'active', lastModified: '2024-01-13' }
+            ].map((item) => (
+              <tr key={item.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="font-medium text-gray-900">{item.name}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {item.type}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {item.source}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StatusBadge status={item.status} />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {item.lastModified}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button className="text-blue-600 hover:text-blue-900">
+                    <ExternalLink className="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderRawDataPool = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">총 데이터 크기</h3>
+            <Database className="w-5 h-5 text-blue-600" />
+          </div>
+          <p className="text-2xl font-bold mt-2">2.5 TB</p>
+          <p className="text-sm text-gray-500">최근 30일 증가량: +120GB</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">금일 데이터 입수량</h3>
+            <HardDrive className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-2xl font-bold mt-2">45.2 GB</p>
+          <p className="text-sm text-gray-500">전일 대비: +5.2%</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">데이터 소스</h3>
+            <Database className="w-5 h-5 text-purple-600" />
+          </div>
+          <p className="text-2xl font-bold mt-2">12개</p>
+          <p className="text-sm text-gray-500">활성 소스: 10개</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-medium mb-4">데이터 소스별 현황</h3>
+        {/* 차트나 상세 통계를 추가할 수 있습니다 */}
+      </div>
+    </div>
+  );
+
+  const renderLifecycle = () => (
+    <div className="space-y-4">
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-medium mb-4">데이터 변경 이력</h3>
+        <div className="space-y-4">
+          {[
+            { id: 1, type: 'UPDATE', field: 'customer_id', user: 'admin', date: '2024-01-15 14:30', status: 'pending' },
+            { id: 2, type: 'CREATE', field: 'wallet_address', user: 'system', date: '2024-01-14 11:20', status: 'approved' }
+          ].map((item) => (
+            <div key={item.id} className="flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-4">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  item.type === 'UPDATE' ? 'bg-blue-100' : 'bg-green-100'
+                }`}>
+                  <History className={`w-4 h-4 ${
+                    item.type === 'UPDATE' ? 'text-blue-600' : 'text-green-600'
+                  }`} />
+                </div>
+                <div>
+                  <p className="font-medium">{item.field}</p>
+                  <p className="text-sm text-gray-500">{item.user} • {item.date}</p>
+                </div>
+              </div>
+              <StatusBadge status={item.status} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">데이터 관리</h1>
+        
+        <div className="bg-white rounded-lg shadow mb-6">
+          <div className="px-4 py-2 border-b">
+            <div className="flex gap-4">
+              <TabButton
+                active={activeTab === 'catalog'}
+                icon={Database}
+                label="데이터 카탈로그"
+                onClick={() => setActiveTab('catalog')}
+              />
+              <TabButton
+                active={activeTab === 'raw'}
+                icon={HardDrive}
+                label="Raw Data Pool"
+                onClick={() => setActiveTab('raw')}
+              />
+              <TabButton
+                active={activeTab === 'lifecycle'}
+                icon={History}
+                label="데이터 라이프사이클"
+                onClick={() => setActiveTab('lifecycle')}
+              />
+            </div>
+          </div>
+          
+          <div className="p-4">
+            {activeTab === 'catalog' && renderDataCatalog()}
+            {activeTab === 'raw' && renderRawDataPool()}
+            {activeTab === 'lifecycle' && renderLifecycle()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DataManagementDashboard;
+
+// 인터페이스 모니터링 

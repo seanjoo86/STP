@@ -1,0 +1,175 @@
+import React, { useState } from 'react';
+import { Calendar } from "lucide-react";
+
+const WalletSuspensionModal = ({ account = {
+  id: '',
+  customerName: '',
+  accountNumber: ''
+}, onClose = () => {}, onSubmit = () => {} }) => {
+  const [actionType, setActionType] = useState('suspend'); // 'suspend' or 'close'
+  const [formData, setFormData] = useState({
+    walletType: 'all',
+    reason: 'customer_request',
+    startDate: '',
+    endDate: ''
+  });
+
+  const handleSubmit = () => {
+    onSubmit({
+      accountId: account.id,
+      actionType,
+      ...formData
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg w-full max-w-xl">
+        {/* 헤더 */}
+        <div className="p-6 border-b">
+          <h2 className="text-xl font-bold mb-4">지갑 정지/폐쇄</h2>
+          {/* 고객 정보 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600">고객명</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-gray-100 border rounded-md"
+                value={account.customerName}
+                disabled
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">계좌번호</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-gray-100 border rounded-md"
+                value={account.accountNumber}
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 본문 */}
+        <div className="p-6 space-y-6">
+          {/* 정지/폐쇄 선택 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">처리 유형</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="suspend"
+                  checked={actionType === 'suspend'}
+                  onChange={(e) => setActionType(e.target.value)}
+                  className="form-radio"
+                />
+                <span>정지</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="close"
+                  checked={actionType === 'close'}
+                  onChange={(e) => setActionType(e.target.value)}
+                  className="form-radio"
+                />
+                <span>폐쇄</span>
+              </label>
+            </div>
+          </div>
+
+          {/* 지갑 유형 선택 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {actionType === 'suspend' ? '정지' : '폐쇄'} 대상 지갑 유형
+            </label>
+            <select
+              className="w-full px-3 py-2 border rounded-md"
+              value={formData.walletType}
+              onChange={(e) => setFormData({...formData, walletType: e.target.value})}
+            >
+              <option value="all">모두</option>
+              <option value="issue">발행</option>
+              <option value="distribution">유통</option>
+            </select>
+          </div>
+
+          {/* 사유 선택 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {actionType === 'suspend' ? '정지' : '폐쇄'} 사유
+            </label>
+            <select
+              className="w-full px-3 py-2 border rounded-md"
+              value={formData.reason}
+              onChange={(e) => setFormData({...formData, reason: e.target.value})}
+            >
+              {actionType === 'suspend' ? (
+                <>
+                  <option value="customer_request">고객요청</option>
+                  <option value="accident">사고등록</option>
+                  <option value="other">기타</option>
+                </>
+              ) : (
+                <>
+                  <option value="customer_request">고객요청</option>
+                  <option value="seizure">압류</option>
+                  <option value="inheritance">상속·명의변경</option>
+                  <option value="emigration">해외이주</option>
+                  <option value="other">기타</option>
+                </>
+              )}
+            </select>
+          </div>
+
+          {/* 기간 설정 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {actionType === 'suspend' ? '정지' : '폐쇄'} 기간
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border rounded-md pl-10"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                />
+                <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border rounded-md pl-10"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                />
+                <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div className="p-6 border-t flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 border rounded-md hover:bg-gray-50"
+            onClick={onClose}
+          >
+            취소
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            onClick={handleSubmit}
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WalletSuspensionModal;

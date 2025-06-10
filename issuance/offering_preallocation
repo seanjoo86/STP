@@ -1,0 +1,248 @@
+import React, { useState } from 'react';
+import { Search, AlertCircle, X } from 'lucide-react';
+
+const SubscriptionAllocationPage = () => {
+  const [selectedIssuer, setSelectedIssuer] = useState(null);
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [showIssuerModal, setShowIssuerModal] = useState(false);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [subscriptionInfo, setSubscriptionInfo] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errors, setErrors] = useState({});
+  const [allocationResults, setAllocationResults] = useState(null);
+
+  // 수정된 샘플 데이터
+  const issuers = [
+    { id: '1', name: '뮤직카우' },
+    { id: '2', name: '차지인' },
+    { id: '3', name: '파이브노드' }
+  ];
+
+  const stocks = [
+    { id: '1', name: 'BTS-Butter', symbol: 'BTS' },
+    { id: '2', name: 'TWICE-YES or YES', symbol: 'TWI' },
+    { id: '3', name: 'Taylor Swift - Cruel Summer', symbol: 'CRUS' }
+  ];
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat('ko-KR').format(num);
+  };
+
+  const handleSearch = () => {
+    if (!selectedIssuer || !selectedStock) {
+      setErrors({ search: '발행인과 종목을 모두 선택해주세요' });
+      return;
+    }
+
+    // 조회 결과 데이터 설정
+    setSubscriptionInfo({
+      stockName: 'Taylor Swift - Cruel Summer',
+      symbol: 'CRUS',
+      offeringAmount: 1000000000,
+      offeringPrice: 5000,
+      offeringQuantity: 200000,
+      winningAmount: 900000000,
+      winningPrice: 5000,
+      winningQuantity: 180000,
+      achievementRate: 90,
+      targetCount: 1000,
+      status: '종료'
+    });
+    setErrors({});
+  };
+
+  const handleAllocate = () => {
+    if (window.confirm('가배정을 진행하시겠습니까?')) {
+      // 가배정 처리 로직
+      setSuccessMessage('가배정이 성공적으로 처리되었습니다');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <h1 className="text-2xl font-bold text-center mb-8">청약 배정</h1>
+
+        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          {/* Search Filters */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Issuer Search */}
+            <div>
+              <label className="block mb-2">발행인 검색</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={selectedIssuer?.name || ''}
+                  readOnly
+                  className="flex-1 p-2 border rounded"
+                  placeholder="발행인 선택"
+                />
+                <button
+                  onClick={() => setShowIssuerModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  찾아보기
+                </button>
+              </div>
+            </div>
+
+            {/* Stock Search */}
+            <div>
+              <label className="block mb-2">종목 검색</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={selectedStock?.name || ''}
+                  readOnly
+                  className="flex-1 p-2 border rounded"
+                  placeholder="종목 선택"
+                />
+                <button
+                  onClick={() => setShowStockModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  찾아보기
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleSearch}
+              className="px-6 py-2 bg-blue-600 text-white rounded"
+            >
+              조회
+            </button>
+          </div>
+
+          {/* Messages */}
+          {errors.search && (
+            <div className="p-4 bg-red-50 text-red-600 rounded">
+              {errors.search}
+            </div>
+          )}
+          {successMessage && (
+            <div className="p-4 bg-green-50 text-green-600 rounded">
+              {successMessage}
+            </div>
+          )}
+
+          {/* Subscription Info Table */}
+          {subscriptionInfo && (
+            <div>
+              <table className="w-full">
+                <tbody>
+                  <tr className="border-b">
+                    <th className="text-left p-4 bg-gray-50" width="120">종목정보</th>
+                    <td className="p-4">{subscriptionInfo.stockName} ({subscriptionInfo.symbol})</td>
+                  </tr>
+                  <tr className="border-b">
+                    <th className="text-left p-4 bg-gray-50">공모정보</th>
+                    <td className="p-4">
+                      총액: {formatNumber(subscriptionInfo.offeringAmount)}원<br />
+                      단위: {formatNumber(subscriptionInfo.offeringPrice)}원<br />
+                      수량: {formatNumber(subscriptionInfo.offeringQuantity)}개
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <th className="text-left p-4 bg-gray-50">낙찰정보</th>
+                    <td className="p-4">
+                      총액: {formatNumber(subscriptionInfo.winningAmount)}원<br />
+                      낙찰가: {formatNumber(subscriptionInfo.winningPrice)}원<br />
+                      수량: {formatNumber(subscriptionInfo.winningQuantity)}개
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <th className="text-left p-4 bg-gray-50">달성률</th>
+                    <td className="p-4">{subscriptionInfo.achievementRate}%</td>
+                  </tr>
+                  <tr className="border-b">
+                    <th className="text-left p-4 bg-gray-50">대상자수</th>
+                    <td className="p-4">{formatNumber(subscriptionInfo.targetCount)}명</td>
+                  </tr>
+                  <tr>
+                    <th className="text-left p-4 bg-gray-50">상태</th>
+                    <td className="p-4">{subscriptionInfo.status}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleAllocate}
+                  className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  가배정
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Issuer Selection Modal */}
+      {showIssuerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">발행인 선택</h2>
+              <button onClick={() => setShowIssuerModal(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {issuers.map(issuer => (
+                <button
+                  key={issuer.id}
+                  className="w-full p-3 text-left hover:bg-gray-100 rounded"
+                  onClick={() => {
+                    setSelectedIssuer(issuer);
+                    setShowIssuerModal(false);
+                  }}
+                >
+                  {issuer.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Selection Modal */}
+      {showStockModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">종목 선택</h2>
+              <button onClick={() => setShowStockModal(false)}>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {stocks.map(stock => (
+                <button
+                  key={stock.id}
+                  className="w-full p-3 text-left hover:bg-gray-100 rounded"
+                  onClick={() => {
+                    setSelectedStock(stock);
+                    setShowStockModal(false);
+                  }}
+                >
+                  {stock.name} ({stock.symbol})
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SubscriptionAllocationPage;
+
+// 청약 가배정

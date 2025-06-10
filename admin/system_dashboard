@@ -1,0 +1,184 @@
+import React, { useState } from 'react';
+import { 
+  Settings, 
+  Link2, 
+  Monitor, 
+  ChevronDown, 
+  ChevronUp,
+  Plus,
+  Edit2,
+  Trash2,
+  Search
+} from 'lucide-react';
+
+const systemData = [
+  { category: "System", type: "Customer Service", crud: ["Create", "Read", "Update", "Delete"], description: "Handles customer-facing services and queries." },
+  { category: "System", type: "Wallet Service", crud: ["Create", "Read", "Update", "Delete"], description: "Manages wallet-related data and operations." },
+  { category: "System", type: "Issuance Platform", crud: ["Create", "Read", "Update", "Delete"], description: "Controls issuance of platform services or assets." },
+  { category: "System", type: "Distribution Platform", crud: ["Create", "Read", "Update", "Delete"], description: "Manages distribution of assets or services." },
+  { category: "System", type: "Admin", crud: ["Create", "Read", "Update", "Delete"], description: "Oversees administrative operations and configurations." },
+  { category: "System", type: "Blockchain", crud: ["Read", "Update"], description: "Handles blockchain transactions and smart contracts." }
+];
+
+const interfaceData = [
+  { category: "Interface", type: "On-chain Interface", crud: ["Read", "Update"], description: "Interfacing with blockchain using ABI or RPC." },
+  { category: "Interface", type: "Platform Interface", crud: ["Read", "Update"], description: "Provides API, WebSocket, or EAI for platform operations." },
+  { category: "Interface", type: "Multi-channel Interface", crud: ["Create", "Read", "Update", "Delete"], description: "Supports multiple communication channels like SMS, Email." }
+];
+
+const screenData = [
+  { category: "Screen", type: "Wallet Service Web", crud: ["Read", "Update"], description: "Frontend for wallet service management." },
+  { category: "Screen", type: "Customer Service Web", crud: ["Read", "Update"], description: "Frontend for customer service management." },
+  { category: "Screen", type: "Issuance Portal Web", crud: ["Create", "Read", "Update", "Delete"], description: "Frontend for managing issuance-related activities." }
+];
+
+const CRUDIndicator = ({ operations }) => {
+  const allOperations = ["Create", "Read", "Update", "Delete"];
+  
+  return (
+    <div className="flex gap-1">
+      {allOperations.map(op => (
+        <span
+          key={op}
+          className={`px-2 py-1 rounded text-xs font-medium ${
+            operations.includes(op)
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-gray-100 text-gray-400'
+          }`}
+        >
+          {op[0]}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const CategorySection = ({ title, icon: Icon, data, expanded, onToggle }) => (
+  <div className="border rounded-lg bg-white shadow-sm mb-4">
+    <button
+      onClick={onToggle}
+      className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 rounded-t-lg hover:bg-gray-100"
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="w-5 h-5 text-gray-600" />
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+          {data.length}
+        </span>
+      </div>
+      {expanded ? (
+        <ChevronUp className="w-5 h-5 text-gray-600" />
+      ) : (
+        <ChevronDown className="w-5 h-5 text-gray-600" />
+      )}
+    </button>
+    
+    {expanded && (
+      <div className="p-4">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="검색..."
+              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+          </div>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            추가
+          </button>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CRUD Operations</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((item, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{item.type}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <CRUDIndicator operations={item.crud} />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-500">{item.description}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button className="text-blue-600 hover:text-blue-900">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button className="text-red-600 hover:text-red-900">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+const SystemDashboard = () => {
+  const [expandedSections, setExpandedSections] = useState({
+    systems: true,
+    interfaces: false,
+    screens: false
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">시스템 구성 관리</h1>
+        
+        <CategorySection
+          title="Systems"
+          icon={Settings}
+          data={systemData}
+          expanded={expandedSections.systems}
+          onToggle={() => toggleSection('systems')}
+        />
+        
+        <CategorySection
+          title="Interfaces"
+          icon={Link2}
+          data={interfaceData}
+          expanded={expandedSections.interfaces}
+          onToggle={() => toggleSection('interfaces')}
+        />
+        
+        <CategorySection
+          title="Screens"
+          icon={Monitor}
+          data={screenData}
+          expanded={expandedSections.screens}
+          onToggle={() => toggleSection('screens')}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default SystemDashboard;
+
+// 시스템 대시보드

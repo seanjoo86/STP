@@ -1,0 +1,337 @@
+import React, { useState, useEffect } from 'react';
+import Papa from 'papaparse';
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const [month, day, year] = dateStr.split('-');
+  return `${year}-${month}-${day}`;
+};
+
+const FinancialReport = () => {
+  const [activeTab, setActiveTab] = useState('operation');
+  const [startDate, setStartDate] = useState('2024-12-01');
+  const [endDate, setEndDate] = useState('2024-12-31');
+  const [settlementData, setSettlementData] = useState([]);
+  
+  const searchResult = {
+    issuer: "뮤직카우",
+    stock: "Taylor Swift - Cruel Summer (CRUS)",
+    period: "2024-12-01~2024-12-31"
+  };
+
+  useEffect(() => {
+    const loadSettlementData = async () => {
+      try {
+        const response = await window.fs.readFile('Ascap.csv', { encoding: 'utf8' });
+        Papa.parse(response, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            setSettlementData(results.data);
+          },
+          error: (error) => {
+            console.error('Error parsing CSV:', error);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading settlement data:', error);
+        // 에러 시 샘플 데이터 사용
+        setSettlementData([
+          {
+            "Distribution Date": "2024-01-15",
+            "Performance Start Date": "2023-10-01",
+            "Performance End Date": "2023-12-31",
+            "Work Title": "Cruel Summer",
+            "Program Name": "Radio",
+            "$ Amount": 54503.00,
+            "Territory": "US"
+          }
+        ]);
+      }
+    };
+
+    loadSettlementData();
+  }, []);
+
+  return (
+    <div className="max-w-4xl mx-auto my-10 p-6">
+      <h1 className="text-2xl font-bold mb-8 text-center">신탁재산 운용 현황</h1>
+
+      {/* Search Section */}
+      <div className="bg-white p-6 rounded shadow-md mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">발행인</label>
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="발행인 검색"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">종목</label>
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="종목 검색"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">기간</label>
+            <div className="flex space-x-2">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <span className="flex items-center">~</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+        <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors">
+          조회
+        </button>
+      </div>
+
+      {/* Search Results Table */}
+      <div className="bg-white p-6 rounded shadow-md mb-6">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 text-left">발행인</th>
+              <th className="py-2 text-left">종목</th>
+              <th className="py-2 text-left">운용 기간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="py-2">{searchResult.issuer}</td>
+              <td className="py-2">{searchResult.stock}</td>
+              <td className="py-2">{searchResult.period}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Tab Buttons */}
+      <div className="flex space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab('operation')}
+          className={`px-4 py-2 rounded font-bold text-lg transition-colors ${
+            activeTab === 'operation'
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-red-100'
+          }`}
+        >
+          운용경과
+        </button>
+        <button
+          onClick={() => setActiveTab('settlement')}
+          className={`px-4 py-2 rounded font-bold text-lg transition-colors ${
+            activeTab === 'settlement'
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-green-100'
+          }`}
+        >
+          정산서
+        </button>
+      </div>
+
+      {/* Content Section */}
+      <div className="bg-white p-6 rounded shadow-md">
+        {activeTab === 'operation' ? (
+          <>
+            {/* 기간별 결산내역 */}
+            <div className="mb-10">
+              <h2 className="font-bold text-xl mb-4">▶ 기간별 결산내역</h2>
+              <table className="w-full text-sm text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th className="text-right border-b border-gray-300 py-2"></th>
+                    <th className="text-right border-b border-gray-300 py-2">2024-12-01 ~ 2024-12-31</th>
+                    <th className="text-right border-b border-gray-300 py-2">2024-11-01 ~ 2024-11-30</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-2 font-bold">I. 매출액</td>
+                    <td className="py-2 text-right">54,503</td>
+                    <td className="py-2 text-right">63,095</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 pl-6 text-gray-600">저작권료 수입</td>
+                    <td className="py-1 text-right">54,503</td>
+                    <td className="py-1 text-right">63,095</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">II. 매출원가</td>
+                    <td className="py-2 text-right">0</td>
+                    <td className="py-2 text-right">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">III. 매출총이익</td>
+                    <td className="py-2 text-right">54,503</td>
+                    <td className="py-2 text-right">63,095</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">IV. 판매비와 관리비</td>
+                    <td className="py-2 text-right">1,635</td>
+                    <td className="py-2 text-right">1,891</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 pl-6 text-gray-600">신탁수수료</td>
+                    <td className="py-1 text-right">545</td>
+                    <td className="py-1 text-right">630</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 pl-6 text-gray-600">계산대리업무수수료</td>
+                    <td className="py-1 text-right">1,090</td>
+                    <td className="py-1 text-right">1,261</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 pl-6 text-gray-600">그 외 비용</td>
+                    <td className="py-1 text-right">0</td>
+                    <td className="py-1 text-right">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">V. 영업이익</td>
+                    <td className="py-2 text-right">52,868</td>
+                    <td className="py-2 text-right">61,204</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">VI. 영업외수익</td>
+                    <td className="py-2 text-right">0</td>
+                    <td className="py-2 text-right">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">VII. 영업외비용</td>
+                    <td className="py-2 text-right">0</td>
+                    <td className="py-2 text-right">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">VIII. 법인세차감전이익</td>
+                    <td className="py-2 text-right">52,868</td>
+                    <td className="py-2 text-right">61,204</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">IX. 법인세 등</td>
+                    <td className="py-2 text-right">0</td>
+                    <td className="py-2 text-right">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">X. 당기순이익</td>
+                    <td className="py-2 text-right">52,868</td>
+                    <td className="py-2 text-right">61,204</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="text-gray-600 text-sm mt-4">※ 그 외 비용은 가치평가 수수료, 법률비용 등 각종 비용 발생 시 이를 포함합니다.</p>
+            </div>
+
+            {/* 이익 분배금 지급내역 */}
+            <div>
+              <h2 className="font-bold text-xl mb-4">▶ 이익 분배금 지급내역</h2>
+              <table className="w-full text-sm text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th className="text-right border-b border-gray-300 py-2"></th>
+                    <th className="text-right border-b border-gray-300 py-2">2024-12-01 ~ 2024-12-31</th>
+                    <th className="text-right border-b border-gray-300 py-2">2024-11-01 ~ 2024-11-30</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-2 font-bold">당기순이익</td>
+                    <td className="py-2 text-right">52,868</td>
+                    <td className="py-2 text-right">61,204</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 text-gray-600 pl-6">전기이월영금</td>
+                    <td className="py-2 text-right">8</td>
+                    <td className="py-2 text-right">307</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 text-gray-600 pl-6">배당가능현금</td>
+                    <td className="py-2 text-right">52,876</td>
+                    <td className="py-2 text-right">61,511</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-bold">이익분배금</td>
+                    <td className="py-2 text-right">52,611</td>
+                    <td className="py-2 text-right">61,503</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 text-gray-600 pl-6">배당률</td>
+                    <td className="py-2 text-right">99.50%</td>
+                    <td className="py-2 text-right">99.99%</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 text-gray-600 pl-6">수익증권 수수료</td>
+                    <td className="py-2 text-right">741</td>
+                    <td className="py-2 text-right">741</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 text-gray-600 pl-6">수익잔여 분배금(세전)</td>
+                    <td className="py-2 text-right">71</td>
+                    <td className="py-2 text-right">83</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="text-gray-600 text-sm mt-4">※ 중순이익 및 저작재산권(저작인접권) 관리처분신탁계약에 따라 원 단위 미만 금액은 절사하며, 절사한 금액은 다음 기간 분배금에 합산하여 분배됩니다.</p>
+            </div>
+          </>
+        ) : (
+          // 정산서 테이블
+          <div>
+            <h2 className="font-bold text-xl mb-4">▶ ASCAP 정산 내역</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border-b border-gray-300 p-3 text-left">Distribution Date</th>
+                    <th className="border-b border-gray-300 p-3 text-left">Performance Period</th>
+                    <th className="border-b border-gray-300 p-3 text-left">Work Title</th>
+                    <th className="border-b border-gray-300 p-3 text-left">Program Name</th>
+                    <th className="border-b border-gray-300 p-3 text-right">Amount ($)</th>
+                    <th className="border-b border-gray-300 p-3 text-left">Territory</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {settlementData.map((row, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="border-b border-gray-200 p-3">{formatDate(row['Distribution Date'])}</td>
+                      <td className="border-b border-gray-200 p-3">
+                        {formatDate(row['Performance Start Date'])} ~ {formatDate(row['Performance End Date'])}
+                      </td>
+                      <td className="border-b border-gray-200 p-3">{row['Work Title']}</td>
+                      <td className="border-b border-gray-200 p-3">{row['Program Name'] || '-'}</td>
+                      <td className="border-b border-gray-200 p-3 text-right">
+                        {row['$ Amount']?.toLocaleString(undefined, {
+                          minimumFractionDigits: 3,
+                          maximumFractionDigits: 3
+                        })}
+                      </td>
+                      <td className="border-b border-gray-200 p-3">{row['Territory']}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default FinancialReport;
+
+// 신탁재산 운용 현황

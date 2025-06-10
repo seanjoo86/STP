@@ -1,0 +1,459 @@
+import React, { useState } from 'react';
+import { Search, Layout, Settings, Database, Save, Plus, FileSearch } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+const TabButton = ({ label, icon: Icon, isActive, onClick }) => (
+  <button
+    className={`px-4 py-2 flex items-center gap-2 font-medium ${
+      isActive 
+        ? 'text-blue-600 border-b-2 border-blue-600' 
+        : 'text-gray-500 hover:text-gray-700'
+    }`}
+    onClick={onClick}
+  >
+    <Icon size={16} />
+    {label}
+  </button>
+);
+
+export default function MetaManagement() {
+  const [activeTab, setActiveTab] = useState('components');
+  const [selectedIssuer, setSelectedIssuer] = useState(null);
+  const [isPreview, setIsPreview] = useState(false);
+  const [menuType, setMenuType] = useState('new');
+  const [serviceIdType, setServiceIdType] = useState('new');
+  const [searchFilters, setSearchFilters] = useState({
+    issuerName: '',
+    issuerId: ''
+  });
+
+  const issuers = [
+    { id: 'ISS001', name: '뮤직카우', status: '활성' },
+    { id: 'ISS002', name: '파이브노드', status: '활성' }
+  ];
+
+  const filteredIssuers = issuers.filter(issuer => {
+    if (searchFilters.issuerName && !issuer.name.includes(searchFilters.issuerName)) return false;
+    if (searchFilters.issuerId && !issuer.id.includes(searchFilters.issuerId)) return false;
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>메타 관리</CardTitle>
+            <div className="flex items-center gap-4">
+              <button
+                className={`px-4 py-2 rounded flex items-center gap-2 ${
+                  !isPreview ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                }`}
+                onClick={() => setIsPreview(false)}
+              >
+                <Settings size={16} />
+                메타 생성
+              </button>
+              <button
+                className={`px-4 py-2 rounded flex items-center gap-2 ${
+                  isPreview ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                }`}
+                onClick={() => setIsPreview(true)}
+              >
+                <Layout size={16} />
+                화면 미리보기
+              </button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* 메뉴 설정 */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-medium mb-4">메뉴 설정</h3>
+            <div className="flex gap-4 mb-4">
+              <button
+                className={`flex-1 px-4 py-2 rounded flex items-center justify-center gap-2 ${
+                  menuType === 'new' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                }`}
+                onClick={() => setMenuType('new')}
+              >
+                <Plus size={16} />
+                신규 메뉴 생성
+              </button>
+              <button
+                className={`flex-1 px-4 py-2 rounded flex items-center justify-center gap-2 ${
+                  menuType === 'existing' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                }`}
+                onClick={() => setMenuType('existing')}
+              >
+                <FileSearch size={16} />
+                기존 메뉴에서 선택
+              </button>
+            </div>
+
+            {menuType === 'new' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">메뉴명</label>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded"
+                    placeholder="새 메뉴명 입력"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">상위 메뉴</label>
+                  <select className="w-full p-2 border rounded">
+                    <option value="">선택</option>
+                    <option value="menu1">메뉴 1</option>
+                    <option value="menu2">메뉴 2</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {menuType === 'existing' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">메뉴 검색</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className="flex-1 p-2 border rounded"
+                      placeholder="메뉴명 검색"
+                    />
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                      <Search size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">메뉴명</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">경로</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">선택</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-4 text-sm text-gray-900">전자투표</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">/vote</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          <button className="text-blue-600 hover:text-blue-800">선택</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 발행인 검색 */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">발행인 검색</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">발행인명</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded"
+                  value={searchFilters.issuerName}
+                  onChange={(e) => setSearchFilters({
+                    ...searchFilters,
+                    issuerName: e.target.value
+                  })}
+                  placeholder="발행인명 입력"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">발행인 ID</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded"
+                  value={searchFilters.issuerId}
+                  onChange={(e) => setSearchFilters({
+                    ...searchFilters,
+                    issuerId: e.target.value
+                  })}
+                  placeholder="발행인 ID 입력"
+                />
+              </div>
+            </div>
+
+            <div className="border rounded-lg overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">발행인명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">발행인 ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredIssuers.map((issuer) => (
+                    <tr 
+                      key={issuer.id}
+                      className={`hover:bg-gray-50 cursor-pointer ${
+                        selectedIssuer?.id === issuer.id ? 'bg-blue-50' : ''
+                      }`}
+                      onClick={() => setSelectedIssuer(issuer)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {issuer.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {issuer.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {issuer.status}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 메타 관리 섹션 */}
+          {/* 저장 버튼 */}
+          {selectedIssuer && !isPreview && (
+            <div className="flex justify-end">
+              <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                <Save size={16} />
+                저장하기
+              </button>
+            </div>
+          )}
+
+          {selectedIssuer && (
+            <div className="border-t pt-6 space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium">메타 관리: {selectedIssuer.name}</h3>
+                <span className="text-sm text-gray-500">발행인 ID: {selectedIssuer.id}</span>
+              </div>
+
+              <div className="border-b">
+                <div className="flex gap-4">
+                  <TabButton
+                    label="화면 구성"
+                    icon={Layout}
+                    isActive={activeTab === 'components'}
+                    onClick={() => setActiveTab('components')}
+                  />
+                  <TabButton
+                    label="경로 설정"
+                    icon={Settings}
+                    isActive={activeTab === 'paths'}
+                    onClick={() => setActiveTab('paths')}
+                  />
+                  <TabButton
+                    label="저장/버전"
+                    icon={Database}
+                    isActive={activeTab === 'versions'}
+                    onClick={() => setActiveTab('versions')}
+                  />
+                </div>
+              </div>
+
+              {activeTab === 'components' && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-md font-medium">컴포넌트 목록</h4>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                      <Layout size={16} />
+                      컴포넌트 추가
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="border p-4 rounded bg-white">
+                      <h5 className="font-medium mb-2">텍스트 입력 필드</h5>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="block text-sm text-gray-600">필드명</label>
+                          <input type="text" className="w-full p-2 border rounded" placeholder="필드명 입력" />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-600">데이터 타입</label>
+                          <select className="w-full p-2 border rounded">
+                            <option>텍스트</option>
+                            <option>숫자</option>
+                            <option>날짜</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'versions' && (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-md font-medium">버전 관리</h4>
+                      <div className="flex gap-2">
+                        <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2">
+                          <Plus size={16} />
+                          새 버전 생성
+                        </button>
+                      </div>
+                    </div>
+                    <div className="border rounded-lg overflow-hidden bg-white">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">버전</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">생성일</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">생성자</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">관리</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          <tr>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">v1.0.0</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-02-06</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                활성
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <div className="flex gap-2">
+                                <button className="text-blue-600 hover:text-blue-800">복원</button>
+                                <button className="text-red-600 hover:text-red-800">삭제</button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">v0.9.0</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-02-05</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                                비활성
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <div className="flex gap-2">
+                                <button className="text-blue-600 hover:text-blue-800">복원</button>
+                                <button className="text-red-600 hover:text-red-800">삭제</button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'paths' && (
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <button
+                      className={`flex-1 px-4 py-2 rounded flex items-center justify-center gap-2 ${
+                        serviceIdType === 'new' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}
+                      onClick={() => setServiceIdType('new')}
+                    >
+                      <Plus size={16} />
+                      신규 서비스ID 생성
+                    </button>
+                    <button
+                      className={`flex-1 px-4 py-2 rounded flex items-center justify-center gap-2 ${
+                        serviceIdType === 'existing' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}
+                      onClick={() => setServiceIdType('existing')}
+                    >
+                      <FileSearch size={16} />
+                      기존 서비스ID 선택
+                    </button>
+                  </div>
+
+                  {serviceIdType === 'new' ? (
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">서비스ID 입력</label>
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded"
+                            placeholder="서비스ID를 입력하세요"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">서비스명 입력</label>
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded"
+                            placeholder="서비스명을 입력하세요"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">연결할 인터페이스</label>
+                        <select className="w-full p-2 border rounded">
+                          <option value="">선택하세요</option>
+                          <option value="web-view">Web-view</option>
+                          <option value="rest-api">Rest API</option>
+                          <option value="tr">TR</option>
+                          <option value="smart-contract">Smart Contract</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">인터페이스명</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            className="flex-1 p-2 border rounded bg-gray-100"
+                            placeholder="인터페이스를 선택하세요"
+                            readOnly
+                          />
+                          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <Search size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                          추가
+                        </button>
+                        <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">서비스ID 선택</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            className="flex-1 p-2 border rounded bg-gray-100"
+                            placeholder="서비스ID를 선택하세요"
+                            readOnly
+                          />
+                          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <Search size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// 메타 관리

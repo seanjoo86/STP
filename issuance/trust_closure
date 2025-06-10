@@ -1,0 +1,196 @@
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+const TrustTermination = () => {
+  const [stakeholderData] = useState({
+    customerNumber: "00470790",
+    customerName: "김뮤카",
+    rank: "1",
+    sequence: "02",
+    distributionAmount: "90,000,000",
+    balance: "10,000,000",
+    initialPurchaseAmount: "100,000,000",
+  });
+
+  const [transactionData] = useState({
+    transactionDate: "2025-04-20",
+    fundCode: "330000A",
+    fundName: "해외음악IP_무체재산권",
+    itemCode: "MUS",
+    itemName: "BTS-Butter",
+    transactionType: "공매",
+    distributionAmount: "100,000,000",
+    profitAmount: "90,000,000",
+    costAmount: "10,000,000",
+    tax: "9,000,000",
+    transactionSerial: "002",
+    settlementNumber: "001",
+  });
+
+  const SearchField = ({ label, placeholder }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder={placeholder}
+          className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+          <Search size={16} />
+          검색
+        </button>
+      </div>
+    </div>
+  );
+
+  const InfoCard = ({ title, children }) => (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+
+  const CustomTable = ({ children }) => (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        {children}
+      </table>
+    </div>
+  );
+
+  const StakeholderTable = () => (
+    <CustomTable>
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">구분</th>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">상세 정보</th>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">금액 정보</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="hover:bg-gray-50">
+          <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">고객 정보</td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>고객번호: {stakeholderData.customerNumber}</div>
+              <div>고객명: {stakeholderData.customerName}</div>
+            </div>
+          </td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>순위: {stakeholderData.rank}</div>
+              <div>순번: {stakeholderData.sequence}</div>
+            </div>
+          </td>
+        </tr>
+        <tr className="hover:bg-gray-50">
+          <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">금액 정보</td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>수익권 지급금액: {stakeholderData.distributionAmount}원</div>
+              <div>수익권 잔고: {stakeholderData.balance}원</div>
+            </div>
+          </td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div>최초 매입금액: {stakeholderData.initialPurchaseAmount}원</div>
+          </td>
+        </tr>
+      </tbody>
+    </CustomTable>
+  );
+
+  const TransactionTable = () => (
+    <CustomTable>
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">구분</th>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">상세 정보</th>
+          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">금액 정보</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="hover:bg-gray-50">
+          <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">거래 기본</td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>거래일자: {transactionData.transactionDate}</div>
+              <div>거래유형: {transactionData.transactionType}</div>
+            </div>
+          </td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>거래일련번호: {transactionData.transactionSerial}</div>
+              <div>매매결제번호: {transactionData.settlementNumber}</div>
+            </div>
+          </td>
+        </tr>
+        <tr className="hover:bg-gray-50">
+          <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">펀드/종목</td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>펀드코드: {transactionData.fundCode}</div>
+              <div>펀드명: {transactionData.fundName}</div>
+            </div>
+          </td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>종목코드: {transactionData.itemCode}</div>
+              <div>종목명: {transactionData.itemName}</div>
+            </div>
+          </td>
+        </tr>
+        <tr className="hover:bg-gray-50">
+          <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b">금액 정보</td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>수익권 금액: {transactionData.distributionAmount}원</div>
+              <div>이익 금액: {transactionData.profitAmount}원</div>
+            </div>
+          </td>
+          <td className="px-4 py-3 text-sm text-gray-700 border-b">
+            <div className="space-y-1">
+              <div>비용 금액: {transactionData.costAmount}원</div>
+              <div>과세: {transactionData.tax}원</div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </CustomTable>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>신탁 해지</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <SearchField label="제휴사 검색" placeholder="제휴사명을 입력하세요" />
+              <SearchField label="종목 검색" placeholder="종목명을 입력하세요" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <InfoCard title="이해관계자 정보">
+          <StakeholderTable />
+        </InfoCard>
+
+        <InfoCard title="해지거래내역">
+          <TransactionTable />
+        </InfoCard>
+      </div>
+    </div>
+  );
+};
+
+export default TrustTermination;
+
+// 신탁 해지 

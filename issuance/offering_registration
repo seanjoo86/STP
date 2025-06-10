@@ -1,0 +1,256 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, Upload, AlertCircle, X } from 'lucide-react';
+
+const PublicOfferingForm = () => {
+  // 샘플 종목 데이터
+  const stockOptions = [
+    { value: 'stock1', label: '해외음악 IP' },
+    { value: 'stock2', label: 'EV 충전' },
+    { value: 'stock3', label: '신재생에너지' }
+  ];
+
+  const [formData, setFormData] = useState({
+    stockName: '',
+    totalAmount: '',
+    unitAmount: '',
+    issueQuantity: 0,
+    subscriptionStart: '',
+    subscriptionEnd: '',
+    noticeDate: '',
+    paymentDate: '',
+    allocationDate: '',
+    allocationMethod: ''
+  });
+
+  const [file, setFile] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // 발행 수량 자동 계산
+  useEffect(() => {
+    if (formData.totalAmount && formData.unitAmount) {
+      const quantity = Math.floor(Number(formData.totalAmount) / Number(formData.unitAmount));
+      setFormData(prev => ({ ...prev, issueQuantity: quantity }));
+    }
+  }, [formData.totalAmount, formData.unitAmount]);
+
+  // 날짜 자동 계산
+  useEffect(() => {
+    if (formData.subscriptionStart) {
+      setFormData(prev => ({ ...prev, noticeDate: formData.subscriptionStart }));
+    }
+    
+    if (formData.subscriptionEnd) {
+      const endDate = new Date(formData.subscriptionEnd);
+      const paymentDate = new Date(endDate.setDate(endDate.getDate() + 7));
+      
+      setFormData(prev => ({
+        ...prev,
+        paymentDate: paymentDate.toISOString().split('T')[0],
+        allocationDate: paymentDate.toISOString().split('T')[0]
+      }));
+    }
+  }, [formData.subscriptionStart, formData.subscriptionEnd]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    setSuccessMessage('공모 정보가 성공적으로 저장되었으며, 승인 요청이 접수되었습니다.');
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        setErrors({ ...errors, file: '파일 크기는 10MB를 초과할 수 없습니다.' });
+        return;
+      }
+      setFile(file);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 className="text-2xl font-bold mb-6">공모정보 등록</h1>
+        
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-50 text-green-700 rounded flex items-center gap-2">
+            <AlertCircle size={20} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* 종목 선택 */}
+          <div>
+            <label className="block mb-2">종목 검색</label>
+            <select
+              value={formData.stockName}
+              onChange={(e) => setFormData({ ...formData, stockName: e.target.value })}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">종목을 선택해주세요</option>
+              {stockOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 공모가액 정보 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-2">공모가액</label>
+              <input
+                type="number"
+                value={formData.totalAmount}
+                onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })}
+                className="w-full p-2 border rounded"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">단위당 공모가액</label>
+              <input
+                type="number"
+                value={formData.unitAmount}
+                onChange={(e) => setFormData({ ...formData, unitAmount: e.target.value })}
+                className="w-full p-2 border rounded"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">발행 수량</label>
+              <input
+                type="text"
+                value={formData.issueQuantity.toLocaleString()}
+                disabled
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+          </div>
+
+          {/* 청약기일 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-2">청약 시작일</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={formData.subscriptionStart}
+                  onChange={(e) => setFormData({ ...formData, subscriptionStart: e.target.value })}
+                  className="w-full p-2 border rounded"
+                />
+                <Calendar className="absolute right-2 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label className="block mb-2">청약 종료일</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={formData.subscriptionEnd}
+                  onChange={(e) => setFormData({ ...formData, subscriptionEnd: e.target.value })}
+                  className="w-full p-2 border rounded"
+                />
+                <Calendar className="absolute right-2 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* 자동 계산 날짜들 */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block mb-2">청약공고일</label>
+              <input
+                type="date"
+                value={formData.noticeDate}
+                disabled
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">납입기일</label>
+              <input
+                type="date"
+                value={formData.paymentDate}
+                disabled
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">배정공고일</label>
+              <input
+                type="date"
+                value={formData.allocationDate}
+                disabled
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+          </div>
+
+          {/* 배정 방법 */}
+          <div>
+            <label className="block mb-2">배정 방법</label>
+            <select
+              value={formData.allocationMethod}
+              onChange={(e) => setFormData({ ...formData, allocationMethod: e.target.value })}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">선택해주세요</option>
+              <option value="auction">옥션</option>
+              <option value="equal">균등</option>
+              <option value="proportional">비례</option>
+            </select>
+          </div>
+
+          {/* 파일 업로드 */}
+          <div>
+            <label className="block mb-2">증권신고서</label>
+            <div className="border-2 border-dashed rounded-md p-4">
+              <div className="flex flex-col items-center">
+                <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                <label className="cursor-pointer text-blue-600 hover:text-blue-500">
+                  <span>파일 업로드</span>
+                  <input
+                    type="file"
+                    className="sr-only"
+                    onChange={handleFileChange}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                  />
+                </label>
+                <p className="text-sm text-gray-500">PDF, JPG, PNG (최대 10MB)</p>
+              </div>
+            </div>
+            {file && (
+              <div className="mt-2 flex items-center justify-between bg-gray-50 p-2 rounded">
+                <span className="text-sm">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setFile(null)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 승인 요청 버튼 */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            승인 요청
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default PublicOfferingForm;
+
+// 공모 정보 등록

@@ -1,0 +1,136 @@
+import React, { useState } from 'react';
+
+const DocumentCertificateSystem = () => {
+  const [formData, setFormData] = useState({
+    faceValue: '',
+    issuePrice: '',
+    issueQuantity: '',
+    totalAmount: ''
+  });
+
+  const formatNumber = (value) => {
+    const numericValue = value.replace(/,/g, '');
+    if (numericValue === '' || /^\d+$/.test(numericValue)) {
+      return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    return value;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const formattedValue = formatNumber(value);
+    setFormData(prev => ({ ...prev, [name]: formattedValue }));
+  };
+
+  const handleSave = () => {
+    // 저장 로직 구현
+    console.log('저장된 데이터:', formData);
+  };
+
+  return (
+    <div className="flex p-4 gap-6 max-w-screen-2xl mx-auto">
+      {/* 좌측 입력 폼 */}
+      <div className="w-1/3">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-bold mb-6">수익증권 정보 입력</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">수익증권의 액면가액</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="faceValue"
+                  value={formData.faceValue}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-2">원</span>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">수익증권의 발행가액</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="issuePrice"
+                  value={formData.issuePrice}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-2">원</span>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">수익증권의 발행매수(수량)</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="issueQuantity"
+                  value={formData.issueQuantity}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-2">좌</span>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">수익증권의 발행총액</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="totalAmount"
+                  value={formData.totalAmount}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-2">원</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSave}
+              className="w-full mt-6 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 우측 A4 문서 */}
+      <div className="w-2/3">
+        <div className="bg-white shadow-lg rounded-lg mx-auto" style={{
+          width: '210mm',
+          minHeight: '297mm',
+          padding: '20mm',
+          position: 'sticky',
+          top: '1rem'
+        }}>
+          <div className="text-left text-base mb-8">
+            [개별신탁계약(수익증권발행-대체용[885]호) 별첨2]
+          </div>
+          
+          <h1 className="text-xl font-bold text-center mb-8">수익증권의 액면가액, 발행가액 및 발행매수 등</h1>
+          
+          <div className="space-y-6 text-base">
+            <p className="leading-relaxed">1. 수익증권의 액면가액 : {formData.faceValue || '_________________'} 원</p>
+            <p className="leading-relaxed">2. 수익증권의 발행가액 : {formData.issuePrice || '_________________'} 원</p>
+            <p className="leading-relaxed">3. 수익증권의 발행매수(수량) : {formData.issueQuantity || '_________________'} 좌</p>
+            <p className="leading-relaxed">4. 수익증권의 발행총액 : {formData.totalAmount || '_________________'} 원</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DocumentCertificateSystem;
+
+// 개별신탁계약 별첨 2

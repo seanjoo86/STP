@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+
+const RightsAllocation = () => {
+  const [searchData, setSearchData] = useState({
+    issuer: '',
+    stock: 'Taylor Swift - Cruel Summer'
+  });
+
+  return (
+    <div className="max-w-4xl mx-auto p-8">
+      <h1 className="text-2xl font-bold mb-8 text-center">권리 배정</h1>
+
+      {/* Search Section */}
+      <div className="mb-8">
+        <div className="grid grid-cols-2 gap-8 mb-4">
+          {/* 발행인 검색 */}
+          <div>
+            <label className="block text-lg mb-2">발행인 검색</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchData.issuer}
+                className="flex-1 p-2 border rounded"
+                placeholder="뮤직카우"
+              />
+              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                찾아보기
+              </button>
+            </div>
+          </div>
+
+          {/* 종목 검색 */}
+          <div>
+            <label className="block text-lg mb-2">종목 검색</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchData.stock}
+                className="flex-1 p-2 border rounded"
+              />
+              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                찾아보기
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button className="w-40 mx-auto block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          조회
+        </button>
+      </div>
+
+      {/* Results Table */}
+      <div className="border-t">
+        <table className="w-full">
+          <tbody>
+            <tr className="border-b">
+              <td className="py-4 w-1/4 font-medium">종목정보</td>
+              <td className="py-4">Taylor Swift - Cruel Summer</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">저작권료수입(USD)</td>
+              <td className="py-4">98,959</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">신탁수수료(USD)</td>
+              <td className="py-4">989</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">계산대리업무수수료(USD)</td>
+              <td className="py-4">1,979</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">배당금총액(USD)</td>
+              <td className="py-4">95,991</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">총 증권 수량</td>
+              <td className="py-4">180,000주</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">주당 배당이익(USD)</td>
+              <td className="py-4">0.53</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-4 font-medium">배당소득세</td>
+              <td className="py-4">15.4%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* 가배정 Button */}
+        <div className="mt-8 flex justify-center">
+          <button className="px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-lg">
+            가배정
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RightsAllocation;
+
+// 권리 가배정

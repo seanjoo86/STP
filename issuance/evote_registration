@@ -1,0 +1,277 @@
+import React, { useState } from 'react';
+import { Search, X, Plus, AlertCircle, Calendar } from 'lucide-react';
+
+const ElectronicVotingForm = () => {
+  // State declarations
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [votingInfo, setVotingInfo] = useState({
+    title: '',
+    startDate: '',
+    endDate: ''
+  });
+  const [agendaItems, setAgendaItems] = useState([
+    { id: 1, title: '신주발행의 건', selection: '' },
+    { id: 2, title: '대표이사 해임의 건', selection: '' }
+  ]);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Sample stocks data
+  const stocks = [
+    { id: '1', name: '해외음악IP', symbol: 'MUS' },
+    { id: '2', name: 'EV충전', symbol: 'EVC' }
+  ];
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!selectedStock) newErrors.stock = '종목을 선택해주세요';
+    if (!votingInfo.title.trim()) newErrors.title = '투표 안건을 입력해주세요';
+    if (!votingInfo.startDate) newErrors.startDate = '시작일을 선택해주세요';
+    if (!votingInfo.endDate) newErrors.endDate = '종료일을 선택해주세요';
+    if (agendaItems.some(item => !item.selection)) {
+      newErrors.agenda = '모든 안건에 대한 선택지를 선택해주세요';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    // API 호출 로직
+    console.log('Form submitted:', {
+      stock: selectedStock,
+      votingInfo,
+      agendaItems
+    });
+
+    setSuccessMessage('전자투표가 성공적으로 등록되었습니다.');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
+  const addAgendaItem = () => {
+    const newId = Math.max(...agendaItems.map(item => item.id)) + 1;
+    setAgendaItems([...agendaItems, { id: newId, title: '', selection: '' }]);
+  };
+
+  const removeAgendaItem = (id) => {
+    if (agendaItems.length > 1) {
+      setAgendaItems(agendaItems.filter(item => item.id !== id));
+    }
+  };
+
+  const updateAgendaItem = (id, field, value) => {
+    setAgendaItems(agendaItems.map(item =>
+      item.id === id ? { ...item, [field]: value } : item
+    ));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* 헤더 */}
+        <h1 className="text-2xl font-bold text-center mb-8">전자투표 등록</h1>
+
+        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          {successMessage && (
+            <div className="p-4 bg-green-50 text-green-600 rounded flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              {successMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 종목 선택 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">종목 선택</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={selectedStock?.name || ''}
+                  readOnly
+                  className="flex-1 p-2 border rounded bg-gray-50"
+                  placeholder="종목을 선택해주세요"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowStockModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Search className="h-4 w-4" />
+                  찾아보기
+                </button>
+              </div>
+              {errors.stock && (
+                <p className="mt-1 text-sm text-red-600">{errors.stock}</p>
+              )}
+            </div>
+
+            {/* 투표 기본 정보 */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  투표 안건
+                </label>
+                <input
+                  type="text"
+                  value={votingInfo.title}
+                  onChange={(e) => setVotingInfo({...votingInfo, title: e.target.value})}
+                  className="w-full p-2 border rounded"
+                  placeholder="투표 안건을 입력하세요"
+                />
+                {errors.title && (
+                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    투표 시작일
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={votingInfo.startDate}
+                      onChange={(e) => setVotingInfo({...votingInfo, startDate: e.target.value})}
+                      className="w-full p-2 border rounded"
+                    />
+                    <Calendar className="absolute right-2 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
+                  {errors.startDate && (
+                    <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    투표 종료일
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={votingInfo.endDate}
+                      onChange={(e) => setVotingInfo({...votingInfo, endDate: e.target.value})}
+                      className="w-full p-2 border rounded"
+                    />
+                    <Calendar className="absolute right-2 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
+                  {errors.endDate && (
+                    <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 상세 안건 목록 */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">상세 안건 목록</h3>
+                <button
+                  type="button"
+                  onClick={addAgendaItem}
+                  className="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 flex items-center gap-1"
+                >
+                  <Plus className="h-4 w-4" />
+                  안건 추가
+                </button>
+              </div>
+
+              {errors.agenda && (
+                <p className="text-sm text-red-600">{errors.agenda}</p>
+              )}
+
+              <div className="space-y-4">
+                {agendaItems.map((item) => (
+                  <div key={item.id} className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-start mb-4">
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(e) => updateAgendaItem(item.id, 'title', e.target.value)}
+                        className="flex-1 p-2 border rounded"
+                        placeholder="안건 제목을 입력하세요"
+                      />
+                      {agendaItems.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeAgendaItem(item.id)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-4">
+                      {['찬성', '반대', '기권'].map((option) => (
+                        <label key={option} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`agenda-${item.id}`}
+                            value={option}
+                            checked={item.selection === option}
+                            onChange={(e) => updateAgendaItem(item.id, 'selection', e.target.value)}
+                            className="form-radio"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 등록 버튼 */}
+            <div className="flex justify-center pt-4">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                투표 등록
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* 종목 선택 모달 */}
+        {showStockModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg w-full max-w-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">종목 선택</h2>
+                <button
+                  onClick={() => setShowStockModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="space-y-2">
+                {stocks.map(stock => (
+                  <button
+                    key={stock.id}
+                    className="w-full p-3 text-left hover:bg-gray-50 rounded-md flex justify-between items-center"
+                    onClick={() => {
+                      setSelectedStock(stock);
+                      setShowStockModal(false);
+                    }}
+                  >
+                    <span className="font-medium">{stock.name}</span>
+                    <span className="text-gray-500">{stock.symbol}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ElectronicVotingForm;
+
+// 전자투표 등록

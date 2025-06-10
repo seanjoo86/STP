@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>수익 관리 현황</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1e40af;
+      --border-color: #e5e7eb;
+      --header-bg: #f8fafc;
+      --footer-bg: #f1f5f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f9fafb;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .search-area, .date-range-area {
+      background-color: var(--header-bg);
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .search-area label, .date-range-area label {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .search-area input[type="text"] {
+      width: 240px;
+    }
+
+    .date-range-area input[type="text"] {
+      width: 160px;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-area button, .date-range-area button.calendar {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      color: #374151;
+    }
+
+    .search-area button:last-of-type {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .search-area button:first-of-type:hover,
+    .date-range-area button:hover {
+      background-color: #f9fafb;
+    }
+
+    .search-area button:last-of-type:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .date-range-area .date-separator {
+      color: #6b7280;
+      margin: 0 0.5rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--header-bg);
+      font-weight: 600;
+      color: #374151;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    td {
+      color: #4b5563;
+    }
+
+    /* 금액 데이터 우측 정렬 */
+    td:nth-child(4), td:nth-child(7) {
+      text-align: right;
+    }
+
+    /* 첫번째 열 좌측 정렬 및 강조 */
+    td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    /* 합계 행 스타일 */
+    tfoot td {
+      background-color: var(--footer-bg);
+      font-weight: 600;
+      color: #111827;
+      border-top: 2px solid #cbd5e1;
+    }
+
+    tfoot td:first-child {
+      color: var(--primary-color);
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .search-area, .date-range-area {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      input[type="text"] {
+        width: 100% !important;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .date-range-area .date-separator {
+        text-align: center;
+        margin: 0.5rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>수익 관리 현황</h1>
+    
+    <div class="search-area">
+      <label for="issuer-search">발행인 검색</label>
+      <input type="text" id="issuer-search" placeholder="뮤직카우">
+      <button type="button">찾아보기</button>
+      <button type="button">조회</button>
+    </div>
+
+    <div class="date-range-area">
+      <label for="start-date">조회기간</label>
+      <input type="text" id="start-date" placeholder="YYYY-MM-DD">
+      <button type="button" class="calendar">📅</button>
+      <span class="date-separator">~</span>
+      <input type="text" id="end-date" placeholder="YYYY-MM-DD">
+      <button type="button" class="calendar">📅</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2">과목 구분</th>
+            <th colspan="3">수익</th>
+            <th colspan="3">비용</th>
+          </tr>
+          <tr>
+            <th>계정과목코드</th>
+            <th>분개유형</th>
+            <th>금액</th>
+            <th>계정과목코드</th>
+            <th>분개유형</th>
+            <th>금액</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>신탁관리</td>
+            <td>COGM_FEE</td>
+            <td>관리보수대금</td>
+            <td>2,000,000</td>
+            <td>COGM_COST</td>
+            <td>신탁관리비용</td>
+            <td>20,000</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>COGT_FEE</td>
+            <td>운용보수대금</td>
+            <td>100,000</td>
+            <td>CALC_AGY_FEE</td>
+            <td>계산대리업무수수료</td>
+            <td>10,000</td>
+          </tr>
+          <tr>
+            <td>계좌관리</td>
+            <td>ACCT_FEE</td>
+            <td>계좌관리수수료</td>
+            <td>50,000</td>
+            <td>ACCT_OPN_FEE</td>
+            <td>계좌개설대리수수료</td>
+            <td>5,000</td>
+          </tr>
+          <tr>
+            <td>토큰관리</td>
+            <td>TOKN_TECH</td>
+            <td>토큰기술료</td>
+            <td>10,000</td>
+            <td>MNET_USE</td>
+            <td>메인넷사용료</td>
+            <td>1,000</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>TOKN_MAIN</td>
+            <td>토큰유지보수료</td>
+            <td>5,000</td>
+            <td>MNET_MAIN</td>
+            <td>메인넷유지보수수수료</td>
+            <td>500</td>
+          </tr>
+          <tr>
+            <td>상장관리</td>
+            <td>LSTG_FEE</td>
+            <td>상장수수료</td>
+            <td>100,000</td>
+            <td>AUD_FEE</td>
+            <td>감사수수료</td>
+            <td>10,000</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>LSTG_MAIN</td>
+            <td>상장유지관리수수료</td>
+            <td>4,000</td>
+            <td>LGCL_COST</td>
+            <td>법무비용</td>
+            <td>400</td>
+          </tr>
+          <tr>
+            <td>거래관리</td>
+            <td>TRAD_FEE</td>
+            <td>거래수수료</td>
+            <td>2,000</td>
+            <td></td>
+            <td></td>
+            <td>200</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>총 합계</td>
+            <td></td>
+            <td></td>
+            <td>2,271,000</td>
+            <td></td>
+            <td></td>
+            <td>47,100</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
+
+// 수익 관리 현황 

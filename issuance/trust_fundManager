@@ -1,0 +1,230 @@
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const FundManagement = () => {
+  const [formData] = useState({
+    fundCode: "330000A",
+    fundName: "해외음악IP_무체재산권",
+    fundCategoryCode: "저작재산권",
+    trustProductCode: "7120802",
+    trustPeriod: "2025-01-25 ~ 2060-01-24",
+    fundSetupAmount: "100,000,000",
+    initialDeposit: "100,000,000",
+    notificationMethod: "이메일",
+    customerNumber: "00470790",
+    ownershipType: "자익",
+    traderType: "",
+    residentStatus: "거주자",
+    residentCountryCode: "410",
+    residentCountry: "대한민국",
+    receivingAccount: "001-234567-10",
+    contractBalanceSerial: "100",
+    earlyTerminationAllowed: "N",
+    earlyTerminationFeeRate: "0.0000%",
+    basicFeeRate: "0.0000%",
+    upfrontFee: "50,000,000",
+    upfrontFeeRate: "50%",
+    termsChangeNotification: "통지생략",
+    taxation: "기타소득세",
+    withholdingTaxSpecial: "N",
+    fundTermination: "N",
+    terminationDate: "",
+    lastProfitPaymentDate: "",
+    nextProfitPaymentDate: "",
+    lastFeeAcquisitionDate: "",
+    nextFeeAcquisitionDate: "",
+    specialContract: "N",
+    lastModifiedBy: "김스트",
+    lastModifiedAt: "2025-01-25 09:40:11",
+  });
+
+  const ReadOnlyField = ({ label, value, className = "" }) => (
+    <div className={className}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <input
+        type="text"
+        value={value}
+        readOnly
+        className="w-full p-2 border rounded bg-gray-100"
+      />
+    </div>
+  );
+
+  const RadioField = ({ label, options, value }) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="flex items-center gap-6">
+        {options.map((option) => (
+          <label key={option} className="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              checked={value === option}
+              readOnly
+              className="w-4 h-4 text-blue-600"
+            />
+            <span className="text-sm text-gray-700">{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
+  const SearchField = ({ label, placeholder }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder={placeholder}
+          className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+          <Search size={16} />
+          검색
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <Card className="max-w-6xl mx-auto">
+        <CardHeader>
+          <CardTitle>펀드 관리</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* 검색 섹션 */}
+          <div className="grid grid-cols-2 gap-4">
+            <SearchField label="제휴사 검색" placeholder="제휴사명을 입력하세요" />
+            <SearchField label="종목 검색" placeholder="종목명을 입력하세요" />
+          </div>
+
+          {/* 기본정보 섹션 */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">기본정보</h2>
+            
+            {/* 주요 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField label="펀드코드" value={formData.fundCode} />
+              <ReadOnlyField label="펀드명" value={formData.fundName} />
+              <ReadOnlyField label="펀드분류코드" value={formData.fundCategoryCode} />
+              <ReadOnlyField label="신탁상품코드" value={formData.trustProductCode} />
+              <ReadOnlyField 
+                label="신탁기간" 
+                value={formData.trustPeriod}
+                className="col-span-2"
+              />
+            </div>
+
+            {/* 금액 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField 
+                label="펀드설정금액" 
+                value={formData.fundSetupAmount} 
+              />
+              <ReadOnlyField 
+                label="최초수탁금액" 
+                value={formData.initialDeposit} 
+              />
+            </div>
+
+            {/* 고객 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField label="고객번호" value={formData.customerNumber} />
+              <ReadOnlyField label="수신계좌번호" value={formData.receivingAccount} />
+              <ReadOnlyField label="거주자국가코드" value={formData.residentCountryCode} />
+              <ReadOnlyField label="거주자국가" value={formData.residentCountry} />
+            </div>
+
+            {/* Radio 버튼 그룹 */}
+            <div className="grid grid-cols-2 gap-4">
+              <RadioField 
+                label="자익타익구분코드" 
+                options={["자익", "타익"]} 
+                value={formData.ownershipType}
+              />
+              <RadioField 
+                label="중도해지가능여부" 
+                options={["N", "Y"]} 
+                value={formData.earlyTerminationAllowed}
+              />
+              <RadioField 
+                label="펀드해지여부" 
+                options={["N", "Y"]} 
+                value={formData.fundTermination}
+              />
+              <RadioField 
+                label="특약계약여부" 
+                options={["N", "Y"]} 
+                value={formData.specialContract}
+              />
+            </div>
+
+            {/* 수수료 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField 
+                label="중도해지수수료율" 
+                value={formData.earlyTerminationFeeRate} 
+              />
+              <ReadOnlyField 
+                label="기본보수율" 
+                value={formData.basicFeeRate} 
+              />
+              <ReadOnlyField 
+                label="선취보수" 
+                value={formData.upfrontFee} 
+              />
+              <ReadOnlyField 
+                label="선취보수율" 
+                value={formData.upfrontFeeRate} 
+              />
+            </div>
+
+            {/* 날짜 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <ReadOnlyField 
+                label="해지일자" 
+                value={formData.terminationDate || "-"} 
+              />
+              <ReadOnlyField 
+                label="최종이익지급일자" 
+                value={formData.lastProfitPaymentDate || "-"} 
+              />
+              <ReadOnlyField 
+                label="차회이익지급일자" 
+                value={formData.nextProfitPaymentDate || "-"} 
+              />
+              <ReadOnlyField 
+                label="최종보수취득일자" 
+                value={formData.lastFeeAcquisitionDate || "-"} 
+              />
+              <ReadOnlyField 
+                label="차회보수취득일자" 
+                value={formData.nextFeeAcquisitionDate || "-"} 
+              />
+            </div>
+
+            {/* 최종 변경 정보 */}
+            <Alert>
+              <AlertDescription>
+                최종변경자/일시: {formData.lastModifiedBy} / {formData.lastModifiedAt}
+              </AlertDescription>
+            </Alert>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default FundManagement;
+
+// 펀드 관리 

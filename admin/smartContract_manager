@@ -1,0 +1,351 @@
+import React, { useState, useEffect } from 'react';
+
+const DSProtocolManager = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState({});
+  const [message, setMessage] = useState('');
+  const [investorTable, setInvestorTable] = useState([]);
+  const [stepsData, setStepsData] = useState({
+    issuerAddress: '',
+    totalAmount: '',
+    productAddress: ''
+  });
+
+  const generateRandomWallet = () => '0x' + Array.from({length: 40}, () => 
+    '0123456789ABCDEF'[Math.floor(Math.random() * 16)]
+  ).join('');
+
+  const loadInvestors = () => {
+    const investors = Array.from({length: 10}, () => ({
+      address: generateRandomWallet(),
+      token: 'BUTR'
+    }));
+    setInvestorTable(investors);
+  };
+
+  const steps = [
+    {
+      id: 1,
+      title: '컨트랙트 소유자 설정',
+      fields: [
+        {
+          name: 'address',
+          label: '발행인 주소',
+          type: 'select',
+          options: [
+            { value: '0xAaBbCc...123', label: '뮤직카우 (0xAaBbCc...123)' },
+            { value: '0xDdEeFf...456', label: '차지인 (0xDdEeFf...456)' }
+          ]
+        },
+        {
+          name: 'role',
+          label: '권한',
+          type: 'select',
+          options: [
+            { value: '1', label: 'Issuer (발행)' },
+            { value: '2', label: 'Exchange (유통)' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: '대상 서비스 설정',
+      fields: [
+        {
+          name: 'serviceId',
+          label: '서비스 ID',
+          type: 'select',
+          options: [
+            { value: '1', label: '공모 청약' },
+            { value: '2', label: '배당' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 3,
+      title: '발행 요건 설정',
+      fields: [
+        {
+          name: 'product',
+          label: '대상 상품',
+          type: 'select',
+          options: [
+            { value: '0xDdEeFf...456', label: 'BTS-Butter (0xDdEeFf...456)' },
+            { value: '0xAaBbCc...789', label: 'TWICE-Yes or Yes (0xAaBbCc...789)' }
+          ]
+        },
+        {
+          name: 'totalAmount',
+          label: '발행 총량',
+          type: 'number',
+          placeholder: '발행할 토큰의 총 수량을 입력하세요'
+        },
+        {
+          name: 'investorLimit',
+          label: '투자자 수 제한',
+          type: 'number',
+          placeholder: '최대 투자자 수를 입력하세요'
+        },
+        {
+          name: 'lockupStart',
+          label: '락업 시작일',
+          type: 'date'
+        },
+        {
+          name: 'lockupEnd',
+          label: '락업 종료일',
+          type: 'date'
+        }
+      ]
+    },
+    {
+      id: 4,
+      title: '토큰 발행',
+      fields: [
+        {
+          name: 'product',
+          label: '대상 상품',
+          type: 'select',
+          options: [
+            { value: '0xDdEeFf...456', label: 'BTS-Butter (0xDdEeFf...456)' },
+            { value: '0xAaBbCc...789', label: 'TWICE-Yes or Yes (0xAaBbCc...789)' }
+          ]
+        },
+        {
+          name: 'amount',
+          label: '발행량',
+          type: 'text',
+          readOnly: true,
+          value: stepsData.totalAmount
+        },
+        {
+          name: 'issuerAddress',
+          label: '대상 주소',
+          type: 'text',
+          readOnly: true,
+          value: stepsData.issuerAddress
+        }
+      ]
+    },
+    {
+      id: 5,
+      title: '대상 투자자 설정',
+      fields: [
+        {
+          name: 'investorList',
+          label: '대상 투자자',
+          type: 'investorTable'
+        }
+      ]
+    },
+    {
+      id: 6,
+      title: '토큰 배포',
+      fields: [
+        {
+          name: 'investorList',
+          label: '투자자 주소',
+          type: 'investorTable',
+          readOnly: true
+        },
+        {
+          name: 'distributionAmount',
+          label: '배포 총량',
+          type: 'text',
+          readOnly: true,
+          value: stepsData.totalAmount
+        }
+      ]
+    }
+  ];
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
+    if (field === 'address') {
+      setStepsData(prev => ({
+        ...prev,
+        issuerAddress: value
+      }));
+    } else if (field === 'totalAmount') {
+      setStepsData(prev => ({
+        ...prev,
+        totalAmount: value
+      }));
+    } else if (field === 'product') {
+      setStepsData(prev => ({
+        ...prev,
+        productAddress: value
+      }));
+    }
+  };
+
+  const handleSubmit = async (step) => {
+    try {
+      console.log(`Step ${step.id} data:`, formData);
+      setMessage(`${step.title} 저장 완료`);
+    } catch (error) {
+      setMessage(`오류: ${error.message}`);
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">스마트컨트랙트 관리</h1>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          지갑 연결
+        </button>
+      </div>
+
+      <div className="grid grid-cols-6 gap-2 mb-6">
+        {steps.map((step) => (
+          <button
+            key={step.id}
+            onClick={() => setCurrentStep(step.id)}
+            className={`p-2 text-center rounded ${
+              currentStep === step.id
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
+          >
+            {step.id}
+          </button>
+        ))}
+      </div>
+
+      {steps.map((step) => (
+        step.id === currentStep && (
+          <div key={step.id} className="border rounded-lg p-6 bg-white shadow-sm">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold mb-2">{step.title}</h2>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {step.fields.map((field, idx) => (
+                <div key={idx}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+                  {field.type === 'select' && (
+                    <select
+                      className="w-full p-2 border rounded"
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    >
+                      <option value="">선택하세요</option>
+                      {field.options.map((option, optIdx) => (
+                        <option key={optIdx} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {field.type === 'number' && (
+                    <input
+                      type="number"
+                      className="w-full p-2 border rounded"
+                      placeholder={field.placeholder}
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    />
+                  )}
+                  {field.type === 'date' && (
+                    <input
+                      type="date"
+                      className="w-full p-2 border rounded"
+                      value={formData[field.name] || ''}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    />
+                  )}
+                  {field.type === 'text' && (
+                    <input
+                      type="text"
+                      className="w-full p-2 border rounded bg-gray-50"
+                      value={field.value || formData[field.name] || ''}
+                      readOnly={field.readOnly}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    />
+                  )}
+                  {field.type === 'investorTable' && (
+                    <div>
+                      {!field.readOnly && (
+                        <button
+                          onClick={loadInvestors}
+                          className="mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        >
+                          투자자 불러오기
+                        </button>
+                      )}
+                      {investorTable.length > 0 && (
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  투자자 월렛주소
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  대상토큰
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {investorTable.map((investor, index) => (
+                                <tr key={index}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {investor.address}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {investor.token}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                onClick={() => handleSubmit(step)}
+                className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+              >
+                {step.id === 6 ? '최종 배포' : '저장'}
+              </button>
+              <button
+                onClick={() => {
+                  setFormData({});
+                  if (step.id === 5) setInvestorTable([]);
+                }}
+                className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+              >
+                초기화
+              </button>
+            </div>
+          </div>
+        )
+      ))}
+
+      {message && (
+        <div className="mt-4 p-4 rounded bg-blue-100 text-blue-900">
+          {message}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DSProtocolManager;
+
+// 스마트컨트랙트 관리

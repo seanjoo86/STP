@@ -1,0 +1,165 @@
+import React, { useState } from 'react';
+
+const SpecialTermsDocument = () => {
+  const [formData, setFormData] = useState({
+    account: '',
+    accountHolder: '',
+    cmo: '',
+    applyDate_year: '',
+    applyDate_month: '',
+    applyDate_day: '',
+    confirmDate_year: '',
+    confirmDate_month: '',
+    confirmDate_day: ''
+  });
+
+  const handleSave = () => {
+    console.log('저장된 데이터:', formData);
+  };
+
+  const formatDate = (year, month, day) => {
+    if (!year && !month && !day) return '_____년 __월 __일';
+    return `${year || '____'}년 ${month || '__'}월 ${day || '__'}일`;
+  };
+
+  return (
+    <div className="flex p-4 gap-6 max-w-screen-2xl mx-auto">
+      <div className="w-1/3">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-bold mb-6">특약사항 입력</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">저작권료수취계좌</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.account}
+                  onChange={(e) => setFormData(prev => ({...prev, account: e.target.value}))}
+                  className="w-full p-2 border rounded"
+                  placeholder="은행(증권)"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">예금주</label>
+              <input
+                type="text"
+                value={formData.accountHolder}
+                onChange={(e) => setFormData(prev => ({...prev, accountHolder: e.target.value}))}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">CMO</label>
+              <input
+                type="text"
+                value={formData.cmo}
+                onChange={(e) => setFormData(prev => ({...prev, cmo: e.target.value}))}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">저작권료 분배 적용 기간</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="YYYY"
+                  className="w-24 p-2 border rounded"
+                  value={formData.applyDate_year}
+                  onChange={(e) => setFormData(prev => ({...prev, applyDate_year: e.target.value}))}
+                />
+                <input
+                  type="text"
+                  placeholder="MM"
+                  className="w-16 p-2 border rounded"
+                  value={formData.applyDate_month}
+                  onChange={(e) => setFormData(prev => ({...prev, applyDate_month: e.target.value}))}
+                />
+                <input
+                  type="text"
+                  placeholder="DD"
+                  className="w-16 p-2 border rounded"
+                  value={formData.applyDate_day}
+                  onChange={(e) => setFormData(prev => ({...prev, applyDate_day: e.target.value}))}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">신탁재산 확정일</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="YYYY"
+                  className="w-24 p-2 border rounded"
+                  value={formData.confirmDate_year}
+                  onChange={(e) => setFormData(prev => ({...prev, confirmDate_year: e.target.value}))}
+                />
+                <input
+                  type="text"
+                  placeholder="MM"
+                  className="w-16 p-2 border rounded"
+                  value={formData.confirmDate_month}
+                  onChange={(e) => setFormData(prev => ({...prev, confirmDate_month: e.target.value}))}
+                />
+                <input
+                  type="text"
+                  placeholder="DD"
+                  className="w-16 p-2 border rounded"
+                  value={formData.confirmDate_day}
+                  onChange={(e) => setFormData(prev => ({...prev, confirmDate_day: e.target.value}))}
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleSave}
+              className="w-full mt-6 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-2/3">
+        <div className="bg-white shadow-lg rounded-lg mx-auto" style={{
+          width: '210mm',
+          minHeight: '297mm',
+          padding: '20mm',
+          position: 'sticky',
+          top: '1rem'
+        }}>
+          <div className="text-left text-base mb-8">
+            [개별신탁계약(수익증권발행-대체용[885]호) 별첨5]
+          </div>
+          
+          <h1 className="text-xl font-bold text-center mb-8">특약사항</h1>
+          
+          <div className="space-y-6 text-base">
+            <p className="leading-relaxed">1. 개별신탁계약 체결 이후 2차적 저작물이 작성된 경우, 위탁자는 수탁자에게 신탁저작재산권 추가 요청을 할 수 있다. 이 경우, 수탁자는 별첨 1의 신탁저작재산권 등 목록에 해당 2차적 저작물을 추가한다.</p>
+
+            <p className="leading-relaxed">2. 개별신탁계약 체결 이후 수익증권 발행 이전에 발생한 신탁보수 및 제비용(한국거래소 코드 발급 비용 및 기타 수익증권 발행에 따라 발생하는 비용을 말한다)은 위탁자가 부담한다.</p>
+
+            <p className="leading-relaxed">3. 개별신탁계약 체결 이후 수익증권 발행일 이전까지의 투자수익자들에 대한 저작권료 지급은 플랫폼 운영 수익자가 수행한다.</p>
+
+            <p className="leading-relaxed">4. 저작권료를 수취할 계좌는 다음의 계좌로 한다: {formData.account || '_________________'} (예금주: {formData.accountHolder || '_________________'})</p>
+
+            <p className="leading-relaxed">5. 개별신탁계약 제2조(신탁기간)에서 정한 신탁기간과는 별개로, 신탁된 저작재산권에 따른 {formData.cmo || '_________________'}의 저작권료의 분배 적용 기간은 {formatDate(formData.applyDate_year, formData.applyDate_month, formData.applyDate_day)}부터 신탁기간 종료일까지로 한다.</p>
+
+            <p className="leading-relaxed">6. 이 계약의 신탁재산 확정일은 {formatDate(formData.confirmDate_year, formData.confirmDate_month, formData.confirmDate_day)}로 한다. 신탁재산 확정일부터 이 계약 체결일까지 발생한 신탁재산의 운용 수익 등은 신탁재산에 귀속된다.</p>
+
+            <p className="leading-relaxed">7. 이 개별신탁계약을 체결한 이후 전자등록기관의 전자등록 또는 한국거래소의 증권표준코드 발급 관련 업무 진행이 불가능한 경우, 위탁자는 지체 없이 수탁자에게 계약 해지 통보를 하여야 하며, 해당 저작재산권(저작인접권) 관리처분신탁계약은 통보 즉시 해지된다. 이 경우, 신탁계약 대상 저작재산권(또는 저작인접권)은 해지일에 저작재산권(저작인접권) 관리 신탁기본계약상 신탁재산으로 확정 귀속된다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SpecialTermsDocument;
+
+// 개별신탁계약 별첨 5

@@ -1,0 +1,338 @@
+import React, { useState } from "react";
+import { Search, Plus } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+// 차변/대변 입력 컴포넌트
+const EntryInputSection = ({ type, data, onChange, onAdd }) => {
+  const title = type === "debit" ? "차변 입력" : "대변 입력";
+  
+  return (
+    <div className="space-y-6">
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              계정과목코드
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={data.accountCode}
+                onChange={(e) => onChange("accountCode", e.target.value)}
+                className="flex-1 p-2 border rounded"
+              />
+              <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <Search size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              거래컬럼명
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={data.transactionColumn}
+                onChange={(e) => onChange("transactionColumn", e.target.value)}
+                className="flex-1 p-2 border rounded"
+              />
+              <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <Search size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              고유분개유형번호
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={data.uniqueEntryType}
+                onChange={(e) => onChange("uniqueEntryType", e.target.value)}
+                className="flex-1 p-2 border rounded"
+              />
+              <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <Search size={16} />
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={onAdd}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center justify-center gap-2"
+          >
+            <Plus size={16} />
+            추가
+          </button>
+        </div>
+      </div>
+
+      {/* 결과 테이블 */}
+      <div className="border rounded-lg overflow-hidden">
+        <table className="min-w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">계정과목코드</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">거래컬럼명</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">고유분개유형번호</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.results?.map((row, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{row.accountCode}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{row.transactionColumn}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{row.uniqueEntryType}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const AccountTypeRegistration = () => {
+  // 분개유형 등록 관련 state
+  const [searchData, setSearchData] = useState({
+    productType: { code: "R21", name: "저작권" },
+    settlementType: "당일결제",
+    fundClassification: "무체재산신탁",
+    positionType: "매도",
+    transactionType: { code: "129", name: "기타매도" },
+    auxiliaryCode: "일반",
+  });
+
+  // 차변/대변 관련 state
+  const [entryData, setEntryData] = useState({
+    debit: {
+      accountCode: "6109040000",
+      transactionColumn: "COGT_PRIN",
+      uniqueEntryType: "신탁운용자금입금",
+      results: []
+    },
+    credit: {
+      accountCode: "1101010000",
+      transactionColumn: "RTHG_OTXT_AMT",
+      uniqueEntryType: "신탁운용자금출금",
+      results: []
+    }
+  });
+
+  // 샘플 테이블 데이터
+  const [tableData] = useState([
+    {
+      productType: "R21",
+      securityProductName: "수익권매도",
+      fundClassification: "무체재산신탁",
+      transactionType: "129",
+      settlementType: "당일결제",
+      positionType: "매도",
+      auxiliaryCode: "일반",
+    }
+  ]);
+
+  const handleInputChange = (field, value) => {
+    setSearchData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEntryChange = (type, field, value) => {
+    setEntryData(prev => ({
+      ...prev,
+      [type]: { ...prev[type], [field]: value }
+    }));
+  };
+
+  const handleAddEntry = (type) => {
+    setEntryData(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        results: [...prev[type].results, {
+          accountCode: prev[type].accountCode,
+          transactionColumn: prev[type].transactionColumn,
+          uniqueEntryType: prev[type].uniqueEntryType
+        }]
+      }
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8 space-y-6">
+      {/* 분개유형 등록 카드 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>분개유형 등록</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Search Section */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  상품구분
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchData.productType.code}
+                    readOnly
+                    className="w-24 p-2 border rounded bg-gray-100"
+                    placeholder="코드"
+                  />
+                  <input
+                    type="text"
+                    value={searchData.productType.name}
+                    readOnly
+                    className="flex-1 p-2 border rounded bg-gray-100"
+                    placeholder="상품명"
+                  />
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                    <Search size={16} />
+                    검색
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  유가증권결제구분
+                </label>
+                <select
+                  value={searchData.settlementType}
+                  onChange={(e) => handleInputChange("settlementType", e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="당일결제">당일결제</option>
+                  <option value="당일외결제">당일외결제</option>
+                  <option value="분할결제">분할결제</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  펀드계정과목분류
+                </label>
+                <select
+                  value={searchData.fundClassification}
+                  onChange={(e) => handleInputChange("fundClassification", e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="무체재산신탁">무체재산신탁</option>
+                  <option value="동산신탁">동산신탁</option>
+                  <option value="금전채권신탁">금전채권신탁</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  포지션구분
+                </label>
+                <select
+                  value={searchData.positionType}
+                  onChange={(e) => handleInputChange("positionType", e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="매입">매입</option>
+                  <option value="매도">매도</option>
+                  <option value="현금배당">현금배당</option>
+                  <option value="차입">차입</option>
+                  <option value="차입매도">차입매도</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  거래종류
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchData.transactionType.code}
+                    readOnly
+                    className="w-24 p-2 border rounded bg-gray-100"
+                    placeholder="코드"
+                  />
+                  <input
+                    type="text"
+                    value={searchData.transactionType.name}
+                    readOnly
+                    className="flex-1 p-2 border rounded bg-gray-100"
+                    placeholder="거래종류명"
+                  />
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                    <Search size={16} />
+                    검색
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Result Table */}
+          <div className="border rounded-lg overflow-hidden">
+            <table className="min-w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상품구분</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">유가증권상품명</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">펀드계정과목분류</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">거래종류</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">유가증권결제구분</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">포지션구분</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">보조구분코드</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {tableData.map((row, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.productType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.securityProductName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.fundClassification}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.transactionType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.settlementType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.positionType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{row.auxiliaryCode}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 차변/대변 리스트 카드 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>차변/대변 리스트</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-8">
+            <EntryInputSection
+              type="debit"
+              data={entryData.debit}
+              onChange={(field, value) => handleEntryChange("debit", field, value)}
+              onAdd={() => handleAddEntry("debit")}
+            />
+            <EntryInputSection
+              type="credit"
+              data={entryData.credit}
+              onChange={(field, value) => handleEntryChange("credit", field, value)}
+              onAdd={() => handleAddEntry("credit")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default AccountTypeRegistration;
+
+// 회계 관리

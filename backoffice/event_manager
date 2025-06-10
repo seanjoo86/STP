@@ -1,0 +1,492 @@
+import React, { useState } from 'react';
+import { Calendar, Info, Gift, Users } from 'lucide-react';
+
+// 공통으로 사용되는 입력 컴포넌트
+const InputField = ({ label, type = "text", value, onChange, className = "", ...props }) => (
+  <div className={`mb-4 ${className}`}>
+    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {...props}
+    />
+  </div>
+);
+
+const SelectField = ({ label, value, onChange, options, className = "" }) => (
+  <div className={`mb-4 ${className}`}>
+    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const RadioGroup = ({ label, value, onChange, options }) => (
+  <div className="mb-4">
+    <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+    <div className="space-y-2">
+      {options.map((option) => (
+        <label key={option.value} className="flex items-center gap-2">
+          <input
+            type="radio"
+            value={option.value}
+            checked={value === option.value}
+            onChange={(e) => onChange(e.target.value)}
+            className="text-blue-600 focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-700">{option.label}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
+const EventManagement = () => {
+  const [eventCondition, setEventCondition] = useState({
+    type: "account",
+    dateRange: { start: "", end: "" },
+    excludeConditions: [],
+    balanceDate: "",
+    holdingPeriod: { value: "", unit: "month" },
+    transactionVolume: { value: "", token: "ST" }
+  });
+
+  const [eventReward, setEventReward] = useState({
+    type: "cash",
+    amount: "",
+    currency: "KRW",
+    tokenType: "ST",
+    tokenAmount: "",
+    discountType: "amount",
+    discountValue: "",
+    paymentDate: "",
+    paymentCriteria: "nextDay"
+  });
+
+  const [marketingConsent, setMarketingConsent] = useState({
+    purpose: "",
+    items: "",
+    retentionPeriod: "",
+    rejectionRights: "",
+    disadvantages: "",
+    complianceNumber: ""
+  });
+
+  const [eventList, setEventList] = useState([]);
+
+  const renderRewardFields = () => {
+    switch (eventReward.type) {
+      case "cash":
+        return (
+          <>
+            <InputField
+              label="금액"
+              type="number"
+              value={eventReward.amount}
+              onChange={(value) => setEventReward(prev => ({ ...prev, amount: value }))}
+            />
+            <SelectField
+              label="통화"
+              value={eventReward.currency}
+              onChange={(value) => setEventReward(prev => ({ ...prev, currency: value }))}
+              options={[
+                { value: "KRW", label: "원화(KRW)" },
+                { value: "USD", label: "달러(USD)" }
+              ]}
+            />
+          </>
+        );
+      case "token":
+        return (
+          <>
+            <SelectField
+              label="토큰 종류"
+              value={eventReward.tokenType}
+              onChange={(value) => setEventReward(prev => ({ ...prev, tokenType: value }))}
+              options={[
+                { value: "ST", label: "ST" },
+                { value: "DT", label: "DT" },
+                { value: "EVENT", label: "이벤트토큰" }
+              ]}
+            />
+            <InputField
+              label="수량"
+              type="number"
+              value={eventReward.tokenAmount}
+              onChange={(value) => setEventReward(prev => ({ ...prev, tokenAmount: value }))}
+            />
+          </>
+        );
+      case "discount":
+        return (
+          <>
+            <SelectField
+              label="할인 종류"
+              value={eventReward.discountType}
+              onChange={(value) => setEventReward(prev => ({ ...prev, discountType: value }))}
+              options={[
+                { value: "amount", label: "금액할인" },
+                { value: "rate", label: "요율할인(%)" }
+              ]}
+            />
+            <InputField
+              label="할인 값"
+              type="number"
+              value={eventReward.discountValue}
+              onChange={(value) => setEventReward(prev => ({ ...prev, discountValue: value }))}
+            />
+            {eventReward.discountType === "amount" && (
+              <SelectField
+                label="통화"
+                value={eventReward.currency}
+                onChange={(value) => setEventReward(prev => ({ ...prev, currency: value }))}
+                options={[
+                  { value: "KRW", label: "원화(KRW)" },
+                  { value: "USD", label: "달러(USD)" }
+                ]}
+              />
+            )}
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Calendar className="w-6 h-6" />
+            이벤트 생성 관리
+          </h1>
+        </div>
+
+        <div className="p-6 space-y-8">
+          {/* 이벤트 조건 섹션 */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              이벤트 조건 설정
+            </h2>
+            <div className="space-y-4">
+              <SelectField
+                label="조건 유형"
+                value={eventCondition.type}
+                onChange={(value) => setEventCondition(prev => ({ 
+                  ...prev, 
+                  type: value,
+                  // Reset condition-specific fields
+                  dateRange: { start: "", end: "" },
+                  excludeConditions: [],
+                  balanceDate: "",
+                  holdingPeriod: { value: "", unit: "month" },
+                  transactionVolume: { value: "", token: "ST" }
+                }))}
+                options={[
+                  { value: "account", label: "계좌개설" },
+                  { value: "balance", label: "잔고" },
+                  { value: "transaction", label: "거래" }
+                ]}
+              />
+
+              {/* 계좌개설 조건 */}
+              {eventCondition.type === "account" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">기준기간</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={eventCondition.dateRange.start}
+                        onChange={(e) => setEventCondition(prev => ({
+                          ...prev,
+                          dateRange: { ...prev.dateRange, start: e.target.value }
+                        }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                      <input
+                        type="date"
+                        value={eventCondition.dateRange.end}
+                        onChange={(e) => setEventCondition(prev => ({
+                          ...prev,
+                          dateRange: { ...prev.dateRange, end: e.target.value }
+                        }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">제외요건</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {["기존회원", "미성년자", "외국인", "마케팅수신 미동의"].map((condition) => (
+                        <label key={condition} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={eventCondition.excludeConditions.includes(condition)}
+                            onChange={() => {
+                              const newConditions = eventCondition.excludeConditions.includes(condition)
+                                ? eventCondition.excludeConditions.filter(c => c !== condition)
+                                : [...eventCondition.excludeConditions, condition];
+                              setEventCondition(prev => ({
+                                ...prev,
+                                excludeConditions: newConditions
+                              }));
+                            }}
+                            className="rounded border-gray-300 text-blue-600"
+                          />
+                          <span className="text-sm text-gray-700">{condition}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 잔고 조건 */}
+              {eventCondition.type === "balance" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    type="date"
+                    label="기준일"
+                    value={eventCondition.balanceDate}
+                    onChange={(value) => setEventCondition(prev => ({
+                      ...prev,
+                      balanceDate: value
+                    }))}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField
+                      type="number"
+                      label="보유기간"
+                      value={eventCondition.holdingPeriod.value}
+                      onChange={(value) => setEventCondition(prev => ({
+                        ...prev,
+                        holdingPeriod: { ...prev.holdingPeriod, value }
+                      }))}
+                    />
+                    <SelectField
+                      label="단위"
+                      value={eventCondition.holdingPeriod.unit}
+                      onChange={(value) => setEventCondition(prev => ({
+                        ...prev,
+                        holdingPeriod: { ...prev.holdingPeriod, unit: value }
+                      }))}
+                      options={[
+                        { value: "day", label: "일" },
+                        { value: "month", label: "개월" },
+                        { value: "year", label: "년" }
+                      ]}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 거래 조건 */}
+              {eventCondition.type === "transaction" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">기준기간</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={eventCondition.dateRange.start}
+                        onChange={(e) => setEventCondition(prev => ({
+                          ...prev,
+                          dateRange: { ...prev.dateRange, start: e.target.value }
+                        }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                      <input
+                        type="date"
+                        value={eventCondition.dateRange.end}
+                        onChange={(e) => setEventCondition(prev => ({
+                          ...prev,
+                          dateRange: { ...prev.dateRange, end: e.target.value }
+                        }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField
+                      type="number"
+                      label="거래 토큰 수량"
+                      value={eventCondition.transactionVolume.value}
+                      onChange={(value) => setEventCondition(prev => ({
+                        ...prev,
+                        transactionVolume: { ...prev.transactionVolume, value }
+                      }))}
+                    />
+                    <SelectField
+                      label="토큰 종류"
+                      value={eventCondition.transactionVolume.token}
+                      onChange={(value) => setEventCondition(prev => ({
+                        ...prev,
+                        transactionVolume: { ...prev.transactionVolume, token: value }
+                      }))}
+                      options={[
+                        { value: "ST", label: "ST" },
+                        { value: "DT", label: "DT" }
+                      ]}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* 이벤트 보상 섹션 */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Gift className="w-5 h-5" />
+              이벤트 보상 설정
+            </h2>
+            <div className="space-y-4">
+              <RadioGroup
+                label="보상 유형"
+                value={eventReward.type}
+                onChange={(value) => setEventReward(prev => ({ ...prev, type: value }))}
+                options={[
+                  { value: "cash", label: "현금" },
+                  { value: "token", label: "토큰" },
+                  { value: "discount", label: "수수료" }
+                ]}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {renderRewardFields()}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField
+                  type="date"
+                  label="지급 기준일"
+                  value={eventReward.paymentDate}
+                  onChange={(value) => setEventReward(prev => ({ ...prev, paymentDate: value }))}
+                />
+                <SelectField
+                  label="지급 기준"
+                  value={eventReward.paymentCriteria}
+                  onChange={(value) => setEventReward(prev => ({ ...prev, paymentCriteria: value }))}
+                  options={[
+                    { value: "sameDay", label: "당일" },
+                    { value: "nextDay", label: "익영업일" },
+                    { value: "after2Days", label: "2영업일 후" }
+                  ]}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* 마케팅 정보 동의 섹션 */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              마케팅 정보 동의 설정
+            </h2>
+            <div className="grid grid-cols-1 gap-4">
+              <InputField
+                label="수집·활용 목적"
+                value={marketingConsent.purpose}
+                onChange={(value) => setMarketingConsent(prev => ({ ...prev, purpose: value }))}
+              />
+              <InputField
+                label="수집·활용 항목"
+                value={marketingConsent.items}
+                onChange={(value) => setMarketingConsent(prev => ({ ...prev, items: value }))}
+              />
+              <InputField
+                label="보유·이용 기간"
+                value={marketingConsent.retentionPeriod}
+                onChange={(value) => setMarketingConsent(prev => ({ ...prev, retentionPeriod: value }))}
+              />
+              <InputField
+                label="거부 권리 및 불이익"
+                value={marketingConsent.rejectionRights}
+                onChange={(value) => setMarketingConsent(prev => ({ ...prev, rejectionRights: value }))}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField
+                  label="준법감시필 심사번호"
+                  value={marketingConsent.complianceNumber}
+                  onChange={(value) => setMarketingConsent(prev => ({ ...prev, complianceNumber: value }))}
+                />
+                <button
+                  className="self-end px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  참조양식 검색
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div className="flex justify-end">
+            <button
+              onClick={() => setEventList(prev => [...prev, { id: Date.now(), eventCondition, eventReward, marketingConsent }])}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              이벤트 추가
+            </button>
+          </div>
+        </div>
+
+        {/* 이벤트 리스트 */}
+        <div className="p-6 border-t border-gray-200">
+          <h2 className="text-xl font-semibold mb-4">이벤트 리스트</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">보상 유형</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">보상 금액/수량</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지급 기준일</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">준법감시필 번호</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {eventList.map((event) => (
+                  <tr key={event.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.eventReward.type === 'cash' ? '현금' :
+                       event.eventReward.type === 'token' ? '토큰' : '수수료'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.eventReward.amount || event.eventReward.tokenAmount || event.eventReward.discountValue}
+                      {event.eventReward.type === 'token' ? ` ${event.eventReward.tokenType}` : 
+                       event.eventReward.type === 'discount' ? (event.eventReward.discountType === 'rate' ? '%' : ` ${event.eventReward.currency}`) :
+                       ` ${event.eventReward.currency}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.eventReward.paymentDate}
+                      {event.eventReward.paymentCriteria === 'nextDay' ? ' (익영업일)' :
+                       event.eventReward.paymentCriteria === 'after2Days' ? ' (2영업일 후)' : 
+                       ' (당일)'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.marketingConsent.complianceNumber}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EventManagement;
+
+// 이벤트 관리

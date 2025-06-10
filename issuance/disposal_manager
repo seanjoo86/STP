@@ -1,0 +1,204 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+
+const DisposalManagement = () => {
+  const [selectedStock, setSelectedStock] = useState('');
+  const [showStockDialog, setShowStockDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedVote, setSelectedVote] = useState(null);
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  // 샘플 데이터
+  const stocks = [
+    { id: 1, name: 'BTS-Butter' },
+    { id: 2, name: 'BTS-DNA' },
+  ];
+
+  const votes = [
+    {
+      id: 1,
+      datetime: '2025-03-25 09:00:00',
+      stockInfo: 'BTS-Butter',
+      agenda: 'BTS-Butter 처분 요청의 건',
+      approvalRate: 70,
+      status: '진행 중',
+      proposer: '투자자',
+      startDate: '2025-03-25',
+      endDate: '2025-03-31',
+      voteProgress: {
+        approve: 70,
+        reject: 20,
+        abstain: 10
+      }
+    }
+  ];
+
+  const handleStockSelect = (stock) => {
+    setSelectedStock(stock.name);
+    setShowStockDialog(false);
+    setStatus({ type: 'success', message: '처분 관리 정보가 정상적으로 로드되었습니다.' });
+  };
+
+  const handleRowClick = (vote) => {
+    setSelectedVote(vote);
+    setShowDetailDialog(true);
+  };
+
+  return (
+    <div className="p-6">
+      {/* 제목 */}
+      <h1 className="text-2xl font-bold text-center mb-6">처분 관리</h1>
+
+      {/* 상태 메시지 */}
+      {status.message && (
+        <Alert className="mb-4" variant={status.type === 'success' ? 'default' : 'destructive'}>
+          <AlertDescription>{status.message}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* 검색 필터 */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className="flex-1">
+          <label className="block text-sm font-medium mb-2">종목 선택</label>
+          <div className="flex gap-2">
+            <Input 
+              value={selectedStock} 
+              readOnly 
+              placeholder="종목을 선택하세요"
+              className="flex-1"
+            />
+            <Button onClick={() => setShowStockDialog(true)}>찾아보기</Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 검색 결과 테이블 */}
+      {selectedStock ? (
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">발생일시</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">종목정보</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">투표 안건</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">찬성률</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">상태</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {votes.map((vote) => (
+                <tr 
+                  key={vote.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(vote)}
+                >
+                  <td className="px-4 py-3">{vote.datetime}</td>
+                  <td className="px-4 py-3">{vote.stockInfo}</td>
+                  <td className="px-4 py-3">{vote.agenda}</td>
+                  <td className="px-4 py-3">{vote.approvalRate}%</td>
+                  <td className="px-4 py-3">{vote.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-center text-gray-500">종목을 선택해주세요.</div>
+      )}
+
+      {/* 종목 선택 다이얼로그 */}
+      <Dialog open={showStockDialog} onOpenChange={setShowStockDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>종목 선택</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {stocks.map((stock) => (
+              <div
+                key={stock.id}
+                className="p-2 hover:bg-gray-100 cursor-pointer rounded"
+                onClick={() => handleStockSelect(stock)}
+              >
+                {stock.name}
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 상세 정보 다이얼로그 */}
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>처분요청 전자투표</DialogTitle>
+          </DialogHeader>
+          {selectedVote && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">발의</label>
+                  <Input value={selectedVote.proposer} readOnly />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">투표 상태</label>
+                  <Input value={selectedVote.status} readOnly />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">투표 안건</label>
+                  <Input value={selectedVote.agenda} readOnly className="bg-gray-100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">시작일</label>
+                  <Input value={selectedVote.startDate} readOnly />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">종료일</label>
+                  <Input value={selectedVote.endDate} readOnly />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="font-medium">투표 경과</h3>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>찬성</span>
+                      <span>{selectedVote.voteProgress.approve}%</span>
+                    </div>
+                    <Progress value={selectedVote.voteProgress.approve} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>반대</span>
+                      <span>{selectedVote.voteProgress.reject}%</span>
+                    </div>
+                    <Progress value={selectedVote.voteProgress.reject} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>기권</span>
+                      <span>{selectedVote.voteProgress.abstain}%</span>
+                    </div>
+                    <Progress value={selectedVote.voteProgress.abstain} className="h-2" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-center mt-6">
+                <Button onClick={() => setShowDetailDialog(false)}>닫기</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default DisposalManagement;
+
+// 처분 관리

@@ -1,0 +1,272 @@
+import React, { useState } from 'react';
+
+const InputField = ({ label, value, onChange, placeholder, type = "text" }) => (
+  <div style={{ marginBottom: '20px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>{label}</label>
+    <input
+      type={type}
+      style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+const DateInput = ({ label, yearValue, monthValue, dayValue, onChangeYear, onChangeMonth, onChangeDay }) => (
+  <div style={{ marginBottom: '20px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>{label}</label>
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <input
+        type="text"
+        placeholder="YYYY"
+        style={{ width: '80px', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+        value={yearValue}
+        onChange={onChangeYear}
+      />
+      <input
+        type="text"
+        placeholder="MM"
+        style={{ width: '60px', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+        value={monthValue}
+        onChange={onChangeMonth}
+      />
+      <input
+        type="text"
+        placeholder="DD"
+        style={{ width: '60px', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+        value={dayValue}
+        onChange={onChangeDay}
+      />
+    </div>
+  </div>
+);
+
+export default function DynamicContractForm() {
+  const [formData, setFormData] = useState({
+    계약번호: '',
+    위탁자: '',
+    계약체결일_년: '',
+    계약체결일_월: '',
+    계약체결일_일: '',
+    신탁기간_년: '',
+    신탁기간_월: '',
+    신탁기간_일: '',
+    발행일_년: '',
+    발행일_월: '',
+    발행일_일: '',
+    위약금: ''
+  });
+
+  const handleInputChange = (name, value) => {
+    if (name === '계약번호') {
+      if (value === '' || /^\d+$/.test(value)) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+      return;
+    }
+
+    if (name === '위약금') {
+      // 모든 콤마 제거 후 숫자만 추출
+      const numericValue = value.replace(/,/g, '');
+      if (numericValue === '' || /^\d+$/.test(numericValue)) {
+        // 숫자를 1000단위로 콤마 추가
+        const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        setFormData(prev => ({ ...prev, [name]: formattedValue }));
+      }
+      return;
+    }
+
+    if (name.includes('년')) {
+      if (value === '' || (/^\d{0,4}$/.test(value))) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+      return;
+    }
+
+    if (name.includes('월') || name.includes('일')) {
+      if (value === '' || (/^\d{0,2}$/.test(value) && parseInt(value) <= 31)) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const formatDate = (year, month, day) => {
+    const y = year.padStart(4, '_');
+    const m = month.padStart(2, '_');
+    const d = day.padStart(2, '_');
+    return `${y}년 ${m}월 ${d}일`;
+  };
+
+  return (
+    <div style={{ display: 'flex', padding: '20px', gap: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ width: '30%' }}>
+        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h3 style={{ marginBottom: '20px' }}>입력 항목</h3>
+          
+          <InputField
+            label="계약번호"
+            value={formData.계약번호}
+            onChange={(e) => handleInputChange('계약번호', e.target.value)}
+            placeholder="숫자만 입력 가능"
+          />
+
+          <InputField
+            label="위탁자"
+            value={formData.위탁자}
+            onChange={(e) => handleInputChange('위탁자', e.target.value)}
+          />
+
+          <DateInput
+            label="계약체결일"
+            yearValue={formData.계약체결일_년}
+            monthValue={formData.계약체결일_월}
+            dayValue={formData.계약체결일_일}
+            onChangeYear={(e) => handleInputChange('계약체결일_년', e.target.value)}
+            onChangeMonth={(e) => handleInputChange('계약체결일_월', e.target.value)}
+            onChangeDay={(e) => handleInputChange('계약체결일_일', e.target.value)}
+          />
+
+          <DateInput
+            label="신탁기간"
+            yearValue={formData.신탁기간_년}
+            monthValue={formData.신탁기간_월}
+            dayValue={formData.신탁기간_일}
+            onChangeYear={(e) => handleInputChange('신탁기간_년', e.target.value)}
+            onChangeMonth={(e) => handleInputChange('신탁기간_월', e.target.value)}
+            onChangeDay={(e) => handleInputChange('신탁기간_일', e.target.value)}
+          />
+
+          <DateInput
+            label="수익증권 발행일"
+            yearValue={formData.발행일_년}
+            monthValue={formData.발행일_월}
+            dayValue={formData.발행일_일}
+            onChangeYear={(e) => handleInputChange('발행일_년', e.target.value)}
+            onChangeMonth={(e) => handleInputChange('발행일_월', e.target.value)}
+            onChangeDay={(e) => handleInputChange('발행일_일', e.target.value)}
+          />
+
+          <InputField
+            label="위탁자의 담보책임 관련 위약금"
+            value={formData.위약금}
+            onChange={(e) => handleInputChange('위약금', e.target.value)}
+            placeholder="숫자를 입력하면 자동으로 콤마가 추가됩니다"
+          />
+        </div>
+      </div>
+
+      <div style={{ width: '70%' }}>
+        <div style={{ 
+          backgroundColor: 'white', 
+          padding: '40px', 
+          minHeight: '842px',
+          position: 'relative',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ textAlign: 'right', marginBottom: '30px', fontSize: '12px' }}>
+            2025.01.20 개정<br />
+            준법감시인 심의필 제2023-약관-060호
+          </div>
+          
+          <div style={{ marginBottom: '20px', fontSize: '14px' }}>별지 4.</div>
+
+          <h1 style={{ textAlign: 'center', fontSize: '20px', marginBottom: '30px', fontWeight: 'bold' }}>
+            개별신탁계약(수익증권 발행-대체용) - [{formData.계약번호 || ' '}]호
+          </h1>
+
+          <div style={{ marginBottom: '30px', fontSize: '14px', lineHeight: '1.6' }}>
+            위탁자로서 {formData.위탁자 || '___________________'}(이하 "위탁자"라 한다), 수탁자로서 한화투자증권(이하 "수탁자"라 한다) 및 플랫폼운영수익자로서 주식회사 뮤직카우(이하 "플랫폼운영수익자"라 한다)는 {formatDate(formData.계약체결일_년, formData.계약체결일_월, formData.계약체결일_일)}자 저작재산권(저작인접권)관리처분신탁 기본계약서(수익증권 발행-대체용)(이하 "기본계약"이라 한다)에 근거하여 다음과 같이 개별신탁계약(수익증권 발행-대체용)(이하 "개별신탁계약(수익증권 발행-대체용 [{formData.계약번호 || ' '}]호)"이라 하며, 기본계약과 개별신탁계약(수익증권 발행-대체용 [{formData.계약번호 || ' '}]호)를 총칭하여 "본 신탁계약"이라 한다)을 체결한다.
+          </div>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px', fontSize: '14px' }}>
+            <tbody>
+              <tr style={{ borderTop: '1px solid black', borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  width: '20%', 
+                  borderRight: '1px solid black'
+                }}>1 신탁저작재산권등</td>
+                <td style={{ padding: '10px' }}>
+                  개별신탁계약(수익증권 발행-대체용 [{formData.계약번호 || ' '}]호)의 체결로써 위탁자가 수탁자에게 신탁하고 수탁자가 수탁하는 신탁저작재산권등의 내역은 별첨1.에 기재된 바와 같다.
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>2 신탁기간</td>
+                <td style={{ padding: '10px' }}>
+                  본 신탁계약에 따른 신탁기간은 개별신탁계약(수익증권 발행-대체용 [{formData.계약번호 || ' '}]호) 체결일로부터 {formatDate(formData.신탁기간_년, formData.신탁기간_월, formData.신탁기간_일)}까지의 기간으로 한다.
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>3 수익증권의 액면가액 및 발행매수(수량)</td>
+                <td style={{ padding: '10px' }}>
+                  수익증권의 액면가액, 발행가액(모집가액) 및 발행매수(수량)는 별첨 2.에 기재된 바와 같으며, 이를 변경할 수 없다.
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>4 수익증권 발행일</td>
+                <td style={{ padding: '10px' }}>
+                  {formatDate(formData.발행일_년, formData.발행일_월, formData.발행일_일)}
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>5 신탁보수</td>
+                <td style={{ padding: '10px' }}>
+                  신탁보수는 별첨3.에 기재된 바와 같다.
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>6 위탁자의 담보책임 관련 위약금</td>
+                <td style={{ padding: '10px' }}>
+                  금 {formData.위약금 || '_____________________'}원
+                </td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid black' }}>
+                <td style={{ 
+                  padding: '10px', 
+                  borderRight: '1px solid black'
+                }}>7 특약사항</td>
+                <td style={{ padding: '10px' }}>
+                  특약사항은 별첨5.에 기재된 바와 같다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{ 
+            position: 'absolute',
+            bottom: '20px',
+            left: '0',
+            right: '0',
+            textAlign: 'center',
+            fontSize: '12px'
+          }}>
+            2025.01.20 개정<br />
+            준법감시인 심의필 제2023-약관-060호
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 계약서 관리

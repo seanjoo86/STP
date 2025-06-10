@@ -1,0 +1,216 @@
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Clock, MessageSquare, User, History } from 'lucide-react';
+
+const TicketView = () => {
+  const [tickets] = useState([
+    {
+      id: "TICKET-001",
+      title: "시스템 로그인 오류",
+      status: "처리중",
+      priority: "높음",
+      createdAt: "2024-01-13 09:30:00",
+      customer: "홍길동",
+      department: "IT팀",
+      history: [
+        {
+          id: 1,
+          timestamp: "2024-01-13 09:30:00",
+          type: "생성",
+          status: "신규",
+          actor: "홍길동",
+          comment: "로그인 시도 시 '인증 오류' 메시지가 발생합니다."
+        },
+        {
+          id: 2,
+          timestamp: "2024-01-13 09:45:00",
+          type: "상태변경",
+          status: "접수",
+          actor: "김상담",
+          comment: "티켓이 접수되었습니다. 담당자 배정 중입니다."
+        },
+        {
+          id: 3,
+          timestamp: "2024-01-13 10:00:00",
+          type: "담당자배정",
+          status: "처리중",
+          actor: "이기술",
+          comment: "인증 서버 로그를 확인 중입니다. 1시간 내로 초기 분석 결과를 공유하겠습니다."
+        }
+      ]
+    },
+    {
+      id: "TICKET-002",
+      title: "이메일 전송 실패",
+      status: "신규",
+      priority: "중간",
+      createdAt: "2024-01-13 10:15:00",
+      customer: "김철수",
+      department: "IT팀",
+      history: [
+        {
+          id: 1,
+          timestamp: "2024-01-13 10:15:00",
+          type: "생성",
+          status: "신규",
+          actor: "김철수",
+          comment: "대량 이메일 발송 중 오류가 발생했습니다."
+        }
+      ]
+    }
+  ]);
+
+  // 상태에 따른 배지 색상 결정
+  const getStatusColor = (status) => {
+    const statusColors = {
+      '신규': 'bg-blue-500',
+      '접수': 'bg-yellow-500',
+      '처리중': 'bg-purple-500',
+      '해결': 'bg-green-500',
+      '완료': 'bg-gray-500'
+    };
+    return statusColors[status] || 'bg-gray-500';
+  };
+
+  // 히스토리 타입에 따른 아이콘 결정
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case '생성':
+        return <MessageSquare className="w-4 h-4" />;
+      case '상태변경':
+        return <Clock className="w-4 h-4" />;
+      case '담당자배정':
+        return <User className="w-4 h-4" />;
+      default:
+        return <MessageSquare className="w-4 h-4" />;
+    }
+  };
+
+  const HistoryView = ({ ticket }) => (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-xl font-bold">{ticket.title}</CardTitle>
+            <CardDescription>티켓 번호: {ticket.id}</CardDescription>
+          </div>
+          <Badge 
+            className={`${getStatusColor(ticket.status)} text-white`}
+          >
+            {ticket.status}
+          </Badge>
+        </div>
+        <div className="flex gap-4 mt-2 text-sm text-gray-500">
+          <div>우선순위: {ticket.priority}</div>
+          <div>부서: {ticket.department}</div>
+          <div>고객: {ticket.customer}</div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-96 rounded-md border p-4">
+          <div className="space-y-8">
+            {ticket.history.map((event, index) => (
+              <div key={event.id} className="relative pb-8">
+                {index !== ticket.history.length - 1 && (
+                  <span 
+                    className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" 
+                    aria-hidden="true"
+                  />
+                )}
+                <div className="relative flex items-start space-x-3">
+                  <div className="relative">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+                      {getTypeIcon(event.type)}
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div>
+                      <div className="text-sm">
+                        <span className="font-medium text-gray-900">
+                          {event.actor}
+                        </span>
+                        <span className="ml-2 text-gray-500">
+                          {event.timestamp}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {event.type} - {event.status}
+                      </p>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-700">
+                      {event.comment}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="container mx-auto py-10">
+      <div className="rounded-md border">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">번호</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">우선순위</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">생성일시</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">조치</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {tickets.map((ticket) => (
+              <tr key={ticket.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ticket.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{ticket.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <Badge className={`${getStatusColor(ticket.status)} text-white`}>
+                    {ticket.status}
+                  </Badge>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ticket.priority}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ticket.createdAt}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <History className="w-4 h-4" />
+                        히스토리
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader>
+                        <DialogTitle>티켓 히스토리</DialogTitle>
+                      </DialogHeader>
+                      <HistoryView ticket={ticket} />
+                    </DialogContent>
+                  </Dialog>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default TicketView;
+
+// 협업티켓 뷰

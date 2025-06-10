@@ -1,0 +1,406 @@
+import React, { useState } from "react";
+import { Search, Save, Upload, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const ContractManagement = () => {
+  const [formData, setFormData] = useState({
+    // 자동 입력 필드
+    partnerCode: "04304000",
+    itemCode: "KRG112312001",
+    fundCode: "330000A",
+    contractSerial: "001",
+    
+    // 계약 기본 정보
+    contractStatus: "",
+    contractType: "",
+    managerName: "",
+    managerPhone: "",
+    contractDate: "",
+    maturityDate: "",
+    notificationDate: "",
+    earlyTerminationDate: "",
+    contractDetails: "",
+    remarks: "",
+    attachedFile: null,
+    
+    // 용역비 정보
+    feeDetails: {
+      baseSerial: "001",
+      paymentCycle: "",
+      serviceFee: "",
+      startDate: "",
+      endDate: "",
+      paymentDate: "",
+      bankName: "",
+      accountNumber: "",
+      accountHolder: "",
+    },
+    feeDetailsActive: false,
+  });
+
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateForm = () => {
+    const errors = {};
+    // 필수 필드 검증
+    const requiredFields = [
+      { key: 'managerName', label: '담당자명' },
+      { key: 'managerPhone', label: '담당자 전화번호' },
+      { key: 'contractDate', label: '계약일자' },
+      { key: 'contractDetails', label: '계약내용' },
+    ];
+
+    requiredFields.forEach(({ key, label }) => {
+      if (!formData[key]) errors[key] = `${label}을(를) 입력해주세요`;
+    });
+
+    // 용역비 활성화 시 추가 검증
+    if (formData.feeDetailsActive) {
+      const requiredFeeFields = [
+        { key: 'startDate', label: '적용시작일자' },
+        { key: 'endDate', label: '적용종료일자' },
+        { key: 'paymentDate', label: '납부기준일자' },
+        { key: 'bankName', label: '입금은행' },
+        { key: 'accountNumber', label: '입금계좌' },
+        { key: 'accountHolder', label: '예금주명' },
+      ];
+
+      requiredFeeFields.forEach(({ key, label }) => {
+        if (!formData.feeDetails[key]) errors[`feeDetails.${key}`] = `${label}을(를) 입력해주세요`;
+      });
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === "feeDetailsActive" && !value) {
+        newData.feeDetails = {
+          ...prev.feeDetails,
+          paymentCycle: "",
+          serviceFee: "",
+          startDate: "",
+          endDate: "",
+          paymentDate: "",
+          bankName: "",
+          accountNumber: "",
+          accountHolder: "",
+        };
+      }
+      return newData;
+    });
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleFeeDetailChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      feeDetails: { ...prev.feeDetails, [field]: value },
+    }));
+    if (validationErrors[`feeDetails.${field}`]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`feeDetails.${field}`];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB 제한
+        alert('파일 크기는 5MB를 초과할 수 없습니다.');
+        e.target.value = '';
+        return;
+      }
+      setFormData(prev => ({ ...prev, attachedFile: file }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      alert('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      // API 호출 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("저장된 데이터:", formData);
+      alert("계약 정보가 성공적으로 저장되었습니다.");
+    } catch (error) {
+      console.error("저장 중 오류 발생:", error);
+      alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const FormField = ({ label, type = "text", value, onChange, error, readOnly = false, className = "" }) => (
+    <div className={className}>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        className={`w-full p-2 border rounded ${
+          error ? "border-red-500" : ""
+        } ${readOnly ? "bg-gray-100" : "hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"}`}
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto bg-white p-6 rounded shadow-lg">
+        <h1 className="text-2xl font-bold mb-6">계약 관리</h1>
+
+        {/* 검색 섹션 */}
+        <div className="mb-8">
+          <div className="grid grid-cols-2 gap-4">
+            {['제휴사', '종목'].map((item) => (
+              <div key={item}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {item} 검색
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={`${item} 검색`}
+                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+                    <Search size={16} />
+                    검색
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 계약 상세 정보 */}
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold">계약내역 상세정보</h2>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* 자동 입력 필드 */}
+            {[
+              { label: "제휴사 코드", field: "partnerCode" },
+              { label: "종목 코드", field: "itemCode" },
+              { label: "펀드 코드", field: "fundCode" },
+              { label: "계약 일련번호", field: "contractSerial" },
+            ].map((item) => (
+              <FormField
+                key={item.field}
+                label={item.label}
+                value={formData[item.field]}
+                readOnly={true}
+              />
+            ))}
+
+            {/* 계약 상태 및 유형 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                제휴계약 상태코드
+              </label>
+              <select
+                value={formData.contractStatus}
+                onChange={(e) => handleInputChange("contractStatus", e.target.value)}
+                className="w-full p-2 border rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">선택</option>
+                <option value="contract_set">계약설정</option>
+                <option value="early_termination">중도해지</option>
+                <option value="maturity_termination">만기해지</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                제휴계약 유형코드
+              </label>
+              <select
+                value={formData.contractType}
+                onChange={(e) => handleInputChange("contractType", e.target.value)}
+                className="w-full p-2 border rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">선택</option>
+                <option value="intellectual_trust">무체재산신탁</option>
+                <option value="movable_trust">동산신탁</option>
+                <option value="monetary_trust">금전채권신탁</option>
+              </select>
+            </div>
+
+            {/* 기본 정보 입력 필드 */}
+            {[
+              { label: "담당자명", field: "managerName" },
+              { label: "담당자 전화번호", field: "managerPhone" },
+              { label: "계약일자", field: "contractDate", type: "date" },
+              { label: "만기일자", field: "maturityDate", type: "date" },
+              { label: "계약만기 통보일자", field: "notificationDate", type: "date" },
+              { label: "중도해지일자", field: "earlyTerminationDate", type: "date" },
+            ].map((item) => (
+              <FormField
+                key={item.field}
+                label={item.label}
+                type={item.type || "text"}
+                value={formData[item.field]}
+                onChange={(e) => handleInputChange(item.field, e.target.value)}
+                error={validationErrors[item.field]}
+              />
+            ))}
+
+            {/* 계약내용 및 비고 (전체 너비) */}
+            {[
+              { label: "계약내용", field: "contractDetails" },
+              { label: "비고", field: "remarks" },
+            ].map((item) => (
+              <FormField
+                key={item.field}
+                label={item.label}
+                value={formData[item.field]}
+                onChange={(e) => handleInputChange(item.field, e.target.value)}
+                error={validationErrors[item.field]}
+                className="col-span-2"
+              />
+            ))}
+
+            {/* 파일 첨부 */}
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                첨부파일
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="flex-1 p-2 border rounded"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx"
+                />
+                {formData.attachedFile && (
+                  <span className="text-sm text-gray-600">
+                    {formData.attachedFile.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                최대 파일 크기: 5MB
+              </p>
+            </div>
+          </div>
+
+          {/* 용역비 섹션 */}
+          <div className="space-y-4 mt-8">
+            <h2 className="text-lg font-semibold">제휴사 용역비 기일정보</h2>
+            
+            <div className="flex items-center gap-4 mb-6">
+              <label className="text-sm font-medium">용역비 활성화</label>
+              <div className="flex items-center gap-6">
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="feeActive"
+                    checked={!formData.feeDetailsActive}
+                    onChange={() => handleInputChange("feeDetailsActive", false)}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span>비활성화</span>
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="feeActive"
+                    checked={formData.feeDetailsActive}
+                    onChange={() => handleInputChange("feeDetailsActive", true)}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span>활성화</span>
+                </label>
+              </div>
+            </div>
+
+            {formData.feeDetailsActive && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  label="기준 일련번호"
+                  value={formData.feeDetails.baseSerial}
+                  readOnly={true}
+                />
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    납부주기
+                  </label>
+                  <select
+                    value={formData.feeDetails.paymentCycle}
+                    onChange={(e) => handleFeeDetailChange("paymentCycle", e.target.value)}
+                    className="w-full p-2 border rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">선택</option>
+                    <option value="monthly">월납</option>
+                    <option value="quarterly">분기납</option>
+                    <option value="yearly">연납</option>
+                  </select>
+                </div>
+
+                {/* 용역비 상세 정보 필드들 */}
+                {[
+                  { label: "적용시작일자", field: "startDate", type: "date" },
+                  { label: "적용종료일자", field: "endDate", type: "date" },
+                  { label: "납부기준일자", field: "paymentDate", type: "date" },
+                  { label: "입금은행", field: "bankName" },
+                  { label: "입금계좌", field: "accountNumber" },
+                  { label: "예금주명", field: "accountHolder" },
+                ].map((item) => (
+                  <FormField
+                    key={item.field}
+                    label={item.label}
+                    type={item.type || "text"}
+                    value={formData.feeDetails[item.field]}
+                    onChange={(e) => handleFeeDetailChange(item.field, e.target.value)}
+                    error={validationErrors[`feeDetails.${item.field}`]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 저장 버튼 */}
+          <div className="flex justify-end gap-4 mt-8">
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className={`px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <Save size={16} />
+              {isLoading ? "저장 중..." : "저장"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ContractManagement;
+
+// 계약 관리

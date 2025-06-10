@@ -1,0 +1,279 @@
+import React, { useState } from 'react';
+
+const AccountDetailModal = ({ account = {
+  id: '',
+  customerName: '',
+  accountNumber: '',
+  walletAddress: '',
+  status: '',
+  totalBalance: 0
+}, onClose = () => {} }) => {
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [transferData, setTransferData] = useState({
+    targetAccount: '',
+    amount: '',
+    tokenType: ''
+  });
+
+  // 샘플 데이터
+  const validityData = {
+    accountNumber: "123-456-789",
+    snsId: "user123",
+    cid: "CID123456",
+    platformId: "PLAT123"
+  };
+
+  const tokenBalances = [
+    { type: "해외음악IP", balance: 1000 },
+    { type: "EV충전", balance: 500 },
+    { type: "신재생에너지", balance: 750 },
+    { type: "DT", balance: 300 }
+  ];
+
+  const transactions = [
+    {
+      timestamp: "2024-01-02 15:30:00",
+      walletType: "발행",
+      walletAddress: "0x1234...5678",
+      tokenType: "ST",
+      amount: 100
+    }
+  ];
+
+  const handleSuspendWallet = (action) => {
+    console.log(`${action} wallet for account:`, account.id);
+    setShowSuspendModal(false);
+  };
+
+  const handleTransferBalance = () => {
+    console.log('Transfer balance:', transferData);
+    setShowTransferModal(false);
+  };
+
+  const totalEvaluation = tokenBalances.reduce((sum, token) => sum + token.balance, 0);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-4xl h-screen flex flex-col">
+        {/* 헤더 섹션 - 고정 높이 */}
+        <div className="shrink-0 p-6 border-b bg-white">
+          <h2 className="text-2xl font-bold text-center">{account.customerName}</h2>
+          <div className="text-gray-600 text-center mt-2">
+            <p>UUID: {account.id}</p>
+            <p>계좌번호: {account.accountNumber}</p>
+          </div>
+        </div>
+
+        {/* 메인 컨텐츠 - 스크롤 영역 */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-8">
+            {/* 유효성 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">유효성</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border">
+                  <tbody>
+                    {Object.entries(validityData).map(([key, value]) => (
+                      <tr key={key} className="border-b">
+                        <td className="px-6 py-3 bg-gray-50 text-sm font-medium">
+                          {key === 'accountNumber' ? '계좌번호' :
+                           key === 'snsId' ? 'SNS ID' :
+                           key === 'cid' ? 'CID' : '제휴플랫폼 ID'}
+                        </td>
+                        <td className="px-6 py-3 text-sm">{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                onClick={() => setShowSuspendModal(true)}
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                지갑 정지/폐쇄
+              </button>
+            </div>
+
+            {/* 토큰잔고 섹션 */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">토큰잔고</h3>
+                <p className="text-lg">
+                  총 평가금액: <span className="font-bold">{totalEvaluation.toLocaleString()}원</span>
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">토큰 유형</th>
+                      <th className="px-6 py-3 text-right text-sm font-medium text-gray-500">잔고</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {tokenBalances.map((token) => (
+                      <tr key={token.type}>
+                        <td className="px-6 py-4 text-sm">{token.type}</td>
+                        <td className="px-6 py-4 text-sm text-right">{token.balance.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                onClick={() => setShowTransferModal(true)}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                잔고 이동
+              </button>
+            </div>
+
+            {/* 거래 내역 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">거래내역</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">거래 시각</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">지갑 유형</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">지갑 주소</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">토큰 유형</th>
+                      <th className="px-6 py-3 text-right text-sm font-medium text-gray-500">이동 토큰 수량</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {transactions.map((tx, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 text-sm">{tx.timestamp}</td>
+                        <td className="px-6 py-4 text-sm">{tx.walletType}</td>
+                        <td className="px-6 py-4 text-sm font-mono">{tx.walletAddress}</td>
+                        <td className="px-6 py-4 text-sm">{tx.tokenType}</td>
+                        <td className="px-6 py-4 text-sm text-right">{tx.amount.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* 페이지네이션 */}
+              <div className="flex justify-center space-x-2">
+                <button
+                  className="px-3 py-1 border rounded hover:bg-gray-50"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                >
+                  이전
+                </button>
+                <span className="px-3 py-1">페이지 {currentPage}</span>
+                <button
+                  className="px-3 py-1 border rounded hover:bg-gray-50"
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                >
+                  다음
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 푸터 섹션 - 고정 높이 */}
+        <div className="shrink-0 p-6 border-t bg-white">
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          >
+            닫기
+          </button>
+        </div>
+
+        {/* 지갑 정지/폐쇄 모달 */}
+        {showSuspendModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96">
+              <h3 className="text-lg font-bold mb-4">지갑 작업 선택</h3>
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleSuspendWallet('suspend')}
+                  className="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                >
+                  지갑 정지
+                </button>
+                <button
+                  onClick={() => handleSuspendWallet('close')}
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  지갑 폐쇄
+                </button>
+                <button
+                  onClick={() => setShowSuspendModal(false)}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 잔고 이동 모달 */}
+        {showTransferModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96">
+              <h3 className="text-lg font-bold mb-4">잔고 이동</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">토큰 유형</label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={transferData.tokenType}
+                    onChange={(e) => setTransferData({...transferData, tokenType: e.target.value})}
+                  >
+                    <option value="">토큰 선택</option>
+                    {tokenBalances.map(token => (
+                      <option key={token.type} value={token.type}>{token.type}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">이동 수량</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={transferData.amount}
+                    onChange={(e) => setTransferData({...transferData, amount: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">대상 계좌번호</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={transferData.targetAccount}
+                    onChange={(e) => setTransferData({...transferData, targetAccount: e.target.value})}
+                  />
+                </div>
+                <button
+                  onClick={handleTransferBalance}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  이동
+                </button>
+                <button
+                  onClick={() => setShowTransferModal(false)}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AccountDetailModal;
+
+// 지갑 관리

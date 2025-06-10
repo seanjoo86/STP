@@ -1,0 +1,138 @@
+import React from 'react';
+
+const SubscriptionList = () => {
+  // 샘플 데이터
+  const subscriptions = [
+    {
+      id: "1",
+      allocationDate: "2025-03-07",
+      customerName: "홍길동",
+      accountNumber: "900-123456-10",
+      walletAddress: "0x1234...5678",
+      stockName: "Taylor Swift - Cruel Summer",
+      symbol: "CRUS",
+      allocationAmount: 50000,
+      allocationQuantity: 10
+    },
+    {
+      id: "2",
+      allocationDate: "2025-03-07",
+      customerName: "김한화",
+      accountNumber: "900-654321-10",
+      walletAddress: "0x5678...9012",
+      stockName: "Taylor Swift - Cruel Summer",
+      symbol: "CRUS",
+      allocationAmount: 100000,
+      allocationQuantity: 20
+    },
+    {
+      id: "3",
+      allocationDate: "2025-03-07",
+      customerName: "백다방",
+      accountNumber: "900-135790-10",
+      walletAddress: "0x4321...3250",
+      stockName: "Taylor Swift - Cruel Summer",
+      symbol: "CRUS",
+      allocationAmount: 30000,
+      allocationQuantity: 6
+    }
+  ];
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat('ko-KR').format(num);
+  };
+
+  const downloadExcel = () => {
+    console.log('Download Excel');
+  };
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold text-center mb-8">청약자 명단</h1>
+      
+      {/* 검색 결과 테이블 */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-between items-center mb-4">
+          <div className="space-x-4">
+            <h2 className="text-xl font-semibold inline-block">배정 결과</h2>
+            <span className="text-sm text-gray-500">
+              총 {subscriptions.length}건
+            </span>
+          </div>
+          <div>
+            <button
+              onClick={downloadExcel}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Excel 다운로드
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">배정일</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객명</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">계좌번호</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">대표지갑주소</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">종목정보</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">배정금액</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">배정수량</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {subscriptions.map((subscription) => (
+                <tr key={subscription.id}>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {subscription.allocationDate}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {subscription.customerName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {subscription.accountNumber}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-mono text-gray-900">
+                    {subscription.walletAddress}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {subscription.stockName} ({subscription.symbol})
+                  </td>
+                  <td className="px-6 py-4 text-sm text-right text-gray-900">
+                    {formatNumber(subscription.allocationAmount)}원
+                  </td>
+                  <td className="px-6 py-4 text-sm text-right text-gray-900">
+                    {formatNumber(subscription.allocationQuantity)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="bg-gray-50">
+              <tr>
+                <td colSpan="5" className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
+                  합계
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-right text-gray-900">
+                  {formatNumber(
+                    subscriptions.reduce((sum, item) => sum + item.allocationAmount, 0)
+                  )}원
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-right text-gray-900">
+                  {formatNumber(
+                    subscriptions.reduce((sum, item) => sum + item.allocationQuantity, 0)
+                  )}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SubscriptionList;
+
+// 청약자 명단

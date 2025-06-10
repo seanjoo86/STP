@@ -1,0 +1,298 @@
+import React, { useState } from 'react';
+
+const Modal = ({ isOpen, onClose, title, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+        <div className="p-4">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DisposalNotice = () => {
+  const [selectedStock, setSelectedStock] = useState('');
+  const [showStockDialog, setShowStockDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  // 샘플 데이터
+  const stocks = [
+    { id: 1, name: 'BTS-Butter' },
+    { id: 2, name: 'BTS-DNA' },
+  ];
+
+  const step1Data = [
+    {
+      id: 1,
+      proposer: '투자자',
+      datetime: '2025-03-20 14:00',
+      stockInfo: 'BTS-Butter',
+      agenda: 'BTS-Butter 처분 요청의 건',
+      approvalRate: 75,
+      status: '투표종료'
+    }
+  ];
+
+  const step2Data = [
+    {
+      id: 1,
+      datetime: '2025-03-21 09:00',
+      title: 'BTS-Butter 처분 절차에 관한 안내',
+      status: '공고완료',
+      auctionStartDate: '2025-04-01',
+      auctionEndDate: '2025-04-30',
+      expectedPrice: '100,000,000',
+      appraisalFile: '감정평가서.pdf'
+    }
+  ];
+
+  const step3Data = [
+    {
+      id: 1,
+      proposer: '투자자',
+      datetime: '2025-03-22 10:30',
+      stockInfo: 'BTS-Butter',
+      agenda: '공매예정가격 찬반 투표',
+      approvalRate: 60,
+      status: '투표종료'
+    }
+  ];
+
+  const handleStockSelect = (stock) => {
+    setSelectedStock(stock.name);
+    setShowStockDialog(false);
+    setStatus({ type: 'success', message: '처분 공고 정보가 정상적으로 로드되었습니다.' });
+  };
+
+  const handleDownload = (filename) => {
+    // 실제 구현에서는 파일 다운로드 로직 추가
+    console.log('Downloading:', filename);
+  };
+
+  // 스텝별 테이블 컴포넌트
+  const StepTable = ({ title, data, columns, onDetailClick }) => (
+    <div className="mb-8">
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              {columns.map((column) => (
+                <th key={column.key} className="px-4 py-3 text-left font-medium text-gray-700">
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {data.length > 0 ? (
+              data.map((row) => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-4 py-3">
+                      {column.key === 'action' ? (
+                        <button
+                          onClick={() => onDetailClick(row)}
+                          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                          상세보기
+                        </button>
+                      ) : (
+                        column.key === 'approvalRate' ? 
+                          `${row[column.key]}%` : 
+                          row[column.key]
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length} className="px-4 py-3 text-center text-gray-500">
+                  검색 결과 없음
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="p-6">
+      {/* 제목 */}
+      <h1 className="text-2xl font-bold text-center mb-6">처분 공고</h1>
+
+      {/* 상태 메시지 */}
+      {status.message && (
+        <div className={`mb-4 p-4 rounded ${
+          status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {status.message}
+        </div>
+      )}
+
+      {/* 검색 필터 */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">종목 선택</label>
+        <div className="flex gap-2">
+          <input 
+            type="text"
+            value={selectedStock} 
+            readOnly 
+            placeholder="종목을 선택하세요"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button 
+            onClick={() => setShowStockDialog(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            찾아보기
+          </button>
+        </div>
+      </div>
+
+      {selectedStock ? (
+        <>
+          {/* STEP 1: 처분 요청 */}
+          <StepTable
+            title="STEP 1: 처분 요청"
+            data={step1Data}
+            columns={[
+              { key: 'proposer', label: '발의' },
+              { key: 'datetime', label: '발생일시' },
+              { key: 'stockInfo', label: '종목정보' },
+              { key: 'agenda', label: '투표 안건' },
+              { key: 'approvalRate', label: '찬성률' },
+              { key: 'status', label: '상태' }
+            ]}
+          />
+
+          {/* STEP 2: 처분 공고 */}
+          <StepTable
+            title="STEP 2: 처분 공고"
+            data={step2Data}
+            columns={[
+              { key: 'datetime', label: '일시' },
+              { key: 'title', label: '제목' },
+              { key: 'status', label: '상태' },
+              { key: 'action', label: '' }
+            ]}
+            onDetailClick={() => setShowDetailDialog(true)}
+          />
+
+          {/* STEP 3: 처분 투표 */}
+          <StepTable
+            title="STEP 3: 처분 투표"
+            data={step3Data}
+            columns={[
+              { key: 'proposer', label: '발의' },
+              { key: 'datetime', label: '발생일시' },
+              { key: 'stockInfo', label: '종목정보' },
+              { key: 'agenda', label: '투표 안건' },
+              { key: 'approvalRate', label: '찬성률' },
+              { key: 'status', label: '상태' }
+            ]}
+          />
+        </>
+      ) : (
+        <div className="text-center text-gray-500">종목을 선택해주세요.</div>
+      )}
+
+      {/* 종목 선택 모달 */}
+      <Modal
+        isOpen={showStockDialog}
+        onClose={() => setShowStockDialog(false)}
+        title="종목 선택"
+      >
+        <div className="space-y-2">
+          {stocks.map((stock) => (
+            <div
+              key={stock.id}
+              className="p-2 hover:bg-gray-100 cursor-pointer rounded"
+              onClick={() => handleStockSelect(stock)}
+            >
+              {stock.name}
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* 공매 상세 정보 모달 */}
+      <Modal
+        isOpen={showDetailDialog}
+        onClose={() => setShowDetailDialog(false)}
+        title="공매 상세 정보"
+      >
+        {step2Data[0] && (
+          <div className="space-y-6">
+            {/* 공매 상세 정보 섹션 */}
+            <div className="space-y-3">
+              <h3 className="font-medium text-lg border-b pb-2">공매 상세 정보</h3>
+              <div className="space-y-2">
+                <div className="flex">
+                  <span className="w-32 text-gray-600">공매일시:</span>
+                  <span>{step2Data[0].auctionStartDate} ~ {step2Data[0].auctionEndDate}</span>
+                </div>
+                <div className="flex">
+                  <span className="w-32 text-gray-600">공매예정가격:</span>
+                  <span>{step2Data[0].expectedPrice}원</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="w-32 text-gray-600">감정평가:</span>
+                  <button 
+                    onClick={() => handleDownload(step2Data[0].appraisalFile)}
+                    className="px-4 py-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                  >
+                    감정평가서 다운로드
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 처분 절차 섹션 */}
+            <div className="space-y-3">
+              <h3 className="font-medium text-lg border-b pb-2">처분 절차</h3>
+              <ol className="list-decimal list-inside space-y-3 text-gray-700">
+                <li className="pl-1">
+                  <span className="font-medium">공매 공고:</span>{" "}
+                  저작권 처분을 위해 투자자들에게 공매 공고가 발송됩니다. 공고 내용에는 공매일정 및 관련 조건이 명시됩니다.
+                </li>
+                <li className="pl-1">
+                  <span className="font-medium">입찰 진행:</span>{" "}
+                  공매 일정에 따라 투자자들은 입찰 참여가 가능합니다. 입찰 종료 후 최고가를 제시한 투자자가 낙찰자로 선정됩니다.
+                </li>
+                <li className="pl-1">
+                  <span className="font-medium">처분 완료:</span>{" "}
+                  낙찰 후 거래 조건이 확정되면 계약 체결 및 거래 대금 납입이 이루어집니다. 이후 저작권 처분이 완료됩니다.
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex justify-center pt-2">
+              <button 
+                onClick={() => setShowDetailDialog(false)}
+                className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+export default DisposalNotice;
+
+// 처분 공고

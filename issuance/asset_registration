@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자산 등록 통합 폼</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.5;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 40px;
+      font-weight: 700;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      max-width: 25%;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-bottom: 8px;
+      border: 2px solid;
+    }
+    .step-active .step-circle {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+    .step-inactive .step-circle {
+      background: #fff;
+      color: #9ca3af;
+      border-color: #d1d5db;
+    }
+    .step-completed .step-circle {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+    .step-title {
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      color: #3b82f6;
+    }
+    .step-inactive .step-title {
+      color: #6b7280;
+    }
+    .form-container {
+      min-height: 400px;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .form-tab {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .form-tab.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 120px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-prev {
+      background: #f9fafb;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
+    }
+    .btn-prev:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+    .btn-next {
+      background: #3b82f6;
+      color: white;
+      border: none;
+    }
+    .btn-next:hover {
+      background: #2563eb;
+    }
+    .btn-save {
+      background: #10b981;
+      color: white;
+      border: none;
+    }
+    .btn-save:hover {
+      background: #059669;
+    }
+    .form-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .success-message {
+      background-color: #ecfdf5;
+      border: 1px solid #10b981;
+      color: #047857;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* 물건 등록 폼 스타일 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    .form-field {
+      margin-bottom: 20px;
+    }
+    .form-field.full-width {
+      grid-column: 1 / -1;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background-color: #fff;
+    }
+    
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 10px;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .radio-label input {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .radio-label span {
+      font-size: 14px;
+    }
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .date-range > span {
+      flex-shrink: 0;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .input-with-suffix {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-with-suffix input {
+      flex: 1;
+    }
+    .input-with-suffix span {
+      flex-shrink: 0;
+      font-size: 14px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+    
+    /* 기일 정보 등록 폼 스타일 */
+    .form-group {
+      margin-bottom: 30px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #f9fafb;
+    }
+    .form-group-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #111827;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 16px;
+      margin-left: 16px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+    }
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .number-input input {
+      width: 70px;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .example-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 12px;
+      font-style: italic;
+    }
+    .code-input {
+      margin-bottom: 20px;
+    }
+    .code-input input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #f9fafb;
+      color: #4b5563;
+    }
+    .code-input input:disabled {
+      cursor: not-allowed;
+    }
+    
+    /* 배분정보 등록 폼 스타일 */
+    .detail-settings {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #f9fafb;
+      margin-top: 24px;
+    }
+    .detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #111827;
+    }
+    .setting-group {
+      margin-bottom: 20px;
+    }
+    .percentage-input {
+      position: relative;
+    }
+    .percentage-input input {
+      padding-right: 30px;
+    }
+    .percentage-input .percent-sign {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      pointer-events: none;
+    }
+    .currency-input {
+      display: flex;
+      gap: 8px;
+    }
+    .currency-input select {
+      width: 100px;
+      flex-shrink: 0;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    input[readonly], select[disabled] {
+      background-color: #f9fafb;
+      border-color: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .date-input-wrapper {
+      position: relative;
+    }
+    .date-input-wrapper svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+    }
+    .date-input-wrapper input {
+      padding-left: 40px;
+    }
+    .file-upload-container {
+      margin-top: 8px;
+    }
+    .file-upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f9fafb;
+      transition: border-color 0.2s;
+    }
+    .file-upload-area:hover {
+      border-color: #3b82f6;
+    }
+    .upload-text {
+      margin: 16px 0 8px;
+      font-size: 14px;
+      color: #6b7280;
+      position: relative;
+    }
+    .upload-link {
+      color: #3b82f6;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .upload-hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 0;
+    }
+    .file-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      .progress-steps {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+      }
+      .step {
+        min-width: 100px;
+      }
+      .navigation {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .btn {
+        flex: 1;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script>
+    // 간단한 JavaScript로 탭 전환 기능 구현
+    document.addEventListener('DOMContentLoaded', function() {
+      // 초기 설정
+      let currentStep = 1;
+      updateUI();
+      
+      // 다음 버튼 클릭 처리
+      document.querySelectorAll('.btn-next').forEach(button => {
+        button.addEventListener('click', () => {
+          if (currentStep < 4) {
+            currentStep++;
+            updateUI();
+          }
+        });
+      });
+      
+      // 이전 버튼 클릭 처리
+      document.querySelectorAll('.btn-prev').forEach(button => {
+        button.addEventListener('click', () => {
+          if (currentStep > 1) {
+            currentStep--;
+            updateUI();
+          }
+        });
+      });
+      
+      // 저장 버튼 클릭 처리
+      document.querySelectorAll('.btn-save').forEach(button => {
+        button.addEventListener('click', () => {
+          document.getElementById('success-message').style.display = 'flex';
+          setTimeout(() => {
+            document.getElementById('success-message').style.display = 'none';
+          }, 3000);
+        });
+      });
+      
+      // UI 업데이트 함수
+      function updateUI() {
+        // 탭 컨텐츠 업데이트
+        document.querySelectorAll('.form-tab').forEach((tab, index) => {
+          if (index + 1 === currentStep) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+        });
+        
+        // 단계 표시기 업데이트
+        document.querySelectorAll('.step').forEach((step, index) => {
+          if (index + 1 === currentStep) {
+            step.classList.add('step-active');
+            step.classList.remove('step-inactive', 'step-completed');
+          } else if (index + 1 < currentStep) {
+            step.classList.add('step-completed');
+            step.classList.remove('step-inactive', 'step-active');
+          } else {
+            step.classList.add('step-inactive');
+            step.classList.remove('step-active', 'step-completed');
+          }
+        });
+        
+        // 네비게이션 버튼 업데이트
+        const prevBtn = document.querySelector('.navigation .btn-prev');
+        const nextBtn = document.querySelector('.navigation .btn-next');
+        const saveBtn = document.querySelector('.navigation .btn-save');
+        
+        if (currentStep === 1) {
+          prevBtn.style.visibility = 'hidden';
+        } else {
+          prevBtn.style.visibility = 'visible';
+        }
+        
+        if (currentStep === 4) {
+          nextBtn.style.display = 'none';
+          saveBtn.style.display = 'block';
+        } else {
+          nextBtn.style.display = 'block';
+          saveBtn.style.display = 'none';
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>자산 등록</h1>
+    
+    <!-- 성공 메시지 (기본적으로 숨겨져 있음) -->
+    <div id="success-message" class="success-message" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      자산 등록이 성공적으로 완료되었습니다!
+    </div>
+    
+    <!-- 진행 단계 표시 -->
+    <div class="progress-steps">
+      <div class="step step-active" id="step1">
+        <div class="step-circle">1</div>
+        <div class="step-title">물건 등록</div>
+      </div>
+      <div class="step step-inactive" id="step2">
+        <div class="step-circle">2</div>
+        <div class="step-title">펀드 설정</div>
+      </div>
+      <div class="step step-inactive" id="step3">
+        <div class="step-circle">3</div>
+        <div class="step-title">기일 정보 등록</div>
+      </div>
+      <div class="step step-inactive" id="step4">
+        <div class="step-circle">4</div>
+        <div class="step-title">배분정보 등록</div>
+      </div>
+    </div>
+    
+    <!-- 폼 컨테이너 -->
+    <div class="form-container">
+      <!-- 1단계: 물건 등록 -->
+      <div class="form-tab active" id="tab1">
+        <h2 class="form-title">물건 등록</h2>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="itemName">종목명</label>
+            <input type="text" id="itemName" placeholder="종목명을 입력하세요">
+          </div>
+          
+          <div class="form-field">
+            <label for="managementBranch">관리점명</label>
+            <input type="text" id="managementBranch" placeholder="관리점명을 입력하세요" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="workTitle">저작물제호명</label>
+            <input type="text" id="workTitle" placeholder="저작물제호명을 입력하세요">
+          </div>
+          
+          <div class="form-field">
+            <label for="copyrightType">저작권종류</label>
+            <select id="copyrightType">
+              <option value="">선택해주세요</option>
+              <option value="literary">어문저작물</option>
+              <option value="musical">음악저작물</option>
+              <option value="artistic">미술저작물</option>
+              <option value="architectural">건축저작물</option>
+              <option value="photographic">사진저작물</option>
+              <option value="cinematographic">영상저작물</option>
+              <option value="drawing">도형저작물</option>
+              <option value="computer_program">컴퓨터프로그램저작물</option>
+            </select>
+          </div>
+          
+          <div class="form-field">
+            <label for="shareRatio">지분율</label>
+            <input type="number" id="shareRatio" placeholder="%" min="0" max="100" step="0.01">
+          </div>
+          
+          <div class="form-field">
+            <label for="registrationDate">등록일자</label>
+            <div class="date-input-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <input type="date" id="registrationDate">
+            </div>
+          </div>
+          
+          <div class="form-field full-width">
+            <label for="registrationContent">등록내용</label>
+            <textarea id="registrationContent" placeholder="등록 내용을 입력하세요" rows="4"></textarea>
+          </div>
+          
+          <div class="form-field">
+            <label for="faceValue">액면가</label>
+            <input type="number" id="faceValue" placeholder="원">
+          </div>
+          
+          <div class="form-field">
+            <label for="rightsValidPeriod">권리유효기간</label>
+            <div class="date-input-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <input type="date" id="rightsValidPeriod">
+            </div>
+          </div>
+          
+          <div class="form-field full-width">
+            <label for="contractFile">저작권양수도계약서</label>
+            <div class="file-upload-container">
+              <div class="file-upload-area">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div class="upload-text">
+                  <span class="upload-link">파일 찾기</span>
+                  <input type="file" id="contractFile" accept=".pdf,.doc,.docx" class="file-input">
+                </div>
+                <p class="upload-hint">PDF, DOC, DOCX (최대 10MB)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 2단계: 펀드 설정 -->
+      <div class="form-tab" id="tab2">
+        <h2 class="form-title">펀드 설정</h2>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="fundCode">펀드코드</label>
+            <input type="text" id="fundCode" value="1200SCH" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="fundOfficialName">펀드정식명</label>
+            <input type="text" id="fundOfficialName" value="Cruel_Summer">
+          </div>
+          
+          <div class="form-field">
+            <label for="fundType">펀드분류</label>
+            <input type="text" id="fundType" value="맞춤형" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="trustProductCode">신탁상품코드</label>
+            <input type="text" id="trustProductCode" value="1210014" readonly>
+          </div>
+          
+          <div class="form-field full-width">
+            <label for="trustPeriod">신탁기간</label>
+            <div class="date-range">
+              <div class="date-input-wrapper" style="flex: 1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <input type="date" value="2025-05-25">
+              </div>
+              <span>~</span>
+              <div class="date-input-wrapper" style="flex: 1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <input type="date" value="2060-05-24">
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label for="fundAmount">펀드설정금액</label>
+            <input type="text" id="fundAmount" value="10,000,000">
+          </div>
+          
+          <div class="form-field">
+            <label for="initialTrustAmount">최초수탁금액</label>
+            <input type="text" id="initialTrustAmount" value="10,000,000">
+          </div>
+          
+          <div class="form-field">
+            <label for="customerNumber">고객번호</label>
+            <input type="text" id="customerNumber" value="470790" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label>자의타의구분</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="voluntaryType" value="자의" checked>
+                <span>자의</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="voluntaryType" value="타의">
+                <span>타의</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label for="residentType">거주자구분</label>
+            <input type="text" id="residentType" value="거주자" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="residentCountryCode">거주국가코드</label>
+            <input type="text" id="residentCountryCode" value="410" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="accountNumber">수신계좌번호</label>
+            <input type="text" id="accountNumber" value="50002337420" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label for="contractNumber">계약번호</label>
+            <input type="text" id="contractNumber" value="50002334848143" readonly>
+          </div>
+          
+          <div class="form-field">
+            <label>중도해지가능여부</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="cancelPossible" value="Y">
+                <span>Y</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="cancelPossible" value="N" checked>
+                <span>N</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label>특약계약여부</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="specialAgreement" value="Y">
+                <span>Y</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="specialAgreement" value="N" checked>
+                <span>N</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label for="baseCommissionRate">기본보수율</label>
+            <div class="input-with-suffix">
+              <input type="number" id="baseCommissionRate" value="0.50" step="0.01" min="0" max="100">
+              <span>%</span>
+            </div>
+          </div>
+          
+          <div class="form-field">
+            <label for="upfrontCommissionRate">선취보수율</label>
+            <div class="input-with-suffix">
+              <input type="number" id="upfrontCommissionRate" value="0.25" step="0.01" min="0" max="100">
+              <span>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3단계: 기일 정보 등록 -->
+      <div class="form-tab" id="tab3">
+        <h2 class="form-title">기일 정보 등록</h2>
+        
+        <!-- 종목코드 -->
+        <div class="code-input">
+          <label for="itemCode">종목코드</label>
+          <input type="text" id="itemCode" value="US3043281C0" disabled>
+        </div>
+
+        <!-- 정산 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 정산</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="settlementPeriod" value="월">
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="settlementPeriod" value="분기" checked>
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="settlementPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="settlementPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="settlementNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="settlementBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="settlementDay">일자</label>
+              <input type="number" id="settlementDay" min="1" max="31" value="1">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매 분기 익월 1영업일
+          </div>
+        </div>
+        
+        <!-- 결산 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 결산</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="calculationPeriod" value="월">
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="calculationPeriod" value="분기" checked>
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="calculationPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="calculationPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="calculationNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="calculationBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="calculationDay">일자</label>
+              <input type="number" id="calculationDay" min="1" max="31" value="1">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매 분기 익월 1영업일
+          </div>
+        </div>
+        
+        <!-- 지급 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 지급</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="paymentPeriod" value="월" checked>
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="paymentPeriod" value="분기">
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="paymentPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="paymentPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="paymentNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="paymentBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="paymentDay">일자</label>
+              <input type="number" id="paymentDay" min="1" max="31">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매월 익 영업일
+          </div>
+        </div>
+        
+        <!-- 통지 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 통지</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="noticePeriod" value="월" checked>
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="noticePeriod" value="분기">
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="noticePeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="noticePeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="noticeNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="noticeBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="noticeDay">일자</label>
+              <input type="number" id="noticeDay" min="1" max="31">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매월 익 영업일
+          </div>
+        </div>
+        
+        <!-- 재세금 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 재세금</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="taxPeriod" value="월" checked>
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="taxPeriod" value="분기">
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="taxPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="taxPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="taxNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="taxBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="taxDay">일자</label>
+              <input type="number" id="taxDay" min="1" max="31">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매월 익 영업일
+          </div>
+        </div>
+        
+        <!-- 회계/보고 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 회계/보고</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="reportPeriod" value="월" checked>
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="reportPeriod" value="분기">
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="reportPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="reportPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="reportNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="reportBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="reportDay">일자</label>
+              <input type="number" id="reportDay" min="1" max="31">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매월 익 영업일
+          </div>
+        </div>
+        
+        <!-- 기타 약정 기일 -->
+        <div class="form-group">
+          <h4 class="form-group-title">구분 - 기타 약정</h4>
+          
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="otherPeriod" value="월" checked>
+              <span>월</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="otherPeriod" value="분기">
+              <span>분기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="otherPeriod" value="반기">
+              <span>반기</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="otherPeriod" value="년">
+              <span>년</span>
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="otherNextMonth" checked>
+              <span>익월</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="otherBusinessDay" checked>
+              <span>영업일</span>
+            </label>
+            <div class="number-input">
+              <label for="otherDay">일자</label>
+              <input type="number" id="otherDay" min="1" max="31">
+            </div>
+          </div>
+          
+          <div class="example-text">
+            예시데이터: 매월 익 영업일
+          </div>
+        </div>
+      </div>
+      
+      <!-- 4단계: 배분정보 등록 -->
+      <div class="form-tab" id="tab4">
+        <h2 class="form-title">배분정보 등록</h2>
+        
+        <div class="form-grid">
+          <!-- 종목코드 -->
+          <div class="form-field">
+            <label for="itemCode">종목코드</label>
+            <input type="text" id="itemCode" value="US3043281C0">
+          </div>
+          
+          <!-- 펀드코드 -->
+          <div class="form-field">
+            <label for="fundCode">펀드코드</label>
+            <input type="text" id="fundCode" value="1200SCH">
+          </div>
+          
+          <!-- 신탁상품코드 -->
+          <div class="form-field">
+            <label for="trustProductCode">신탁상품코드</label>
+            <input type="text" id="trustProductCode" value="1210014">
+          </div>
+          
+          <!-- 고유계정대차고 -->
+          <div class="form-field">
+            <label for="ownAccountBalance">고유계정대차고</label>
+            <input type="text" id="ownAccountBalance" value="10,000,000">
+          </div>
+          
+          <!-- 신탁원금 -->
+          <div class="form-field">
+            <label for="trustPrincipal">신탁원금</label>
+            <input type="text" id="trustPrincipal" value="10,000,000">
+          </div>
+          
+          <!-- 펀드배분기준 -->
+          <div class="form-field">
+            <label for="distributionCriteria">펀드배분기준</label>
+            <select id="distributionCriteria">
+              <option value="proportional" selected>수탁금액 비례</option>
+              <option value="equal">균등 배분</option>
+              <option value="contract">계약서 기준</option>
+              <option value="custom">수동 설정</option>
+            </select>
+          </div>
+          
+          <!-- 배분통화 -->
+          <div class="form-field">
+            <label for="distributionCurrency">배분통화</label>
+            <select id="distributionCurrency">
+              <option value="USD" selected>USD</option>
+              <option value="KRW">KRW</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="JPY">JPY</option>
+            </select>
+          </div>
+          
+          <!-- 배분비율 -->
+          <div class="form-field">
+            <label for="distributionRatio">배분비율</label>
+            <div class="percentage-input">
+              <input type="number" id="distributionRatio" value="13.50" step="0.01" min="0" max="100">
+              <span class="percent-sign">%</span>
+            </div>
+          </div>
+
+          <!-- 배분 상세 설정 -->
+          <div class="form-field full-width">
+            <div class="detail-settings">
+              <h4 class="detail-title">배분 상세 설정</h4>
+              
+              <!-- 우선배분 설정 -->
+              <div class="setting-group">
+                <label>우선배분 설정</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="priorityDistribution" value="enabled">
+                    <span>사용</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="priorityDistribution" value="disabled" checked>
+                    <span>미사용</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- 손실분담 설정 -->
+              <div class="setting-group">
+                <label>손실분담 설정</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="lossSharing" value="proportional">
+                    <span>비례 분담</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="lossSharing" value="equal">
+                    <span>균등 분담</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="lossSharing" value="contract" checked>
+                    <span>계약서 기준</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- 최소배분금액 설정 -->
+              <div class="setting-group">
+                <label>최소배분금액 설정</label>
+                <div class="currency-input">
+                  <select id="minDistributionCurrency">
+                    <option value="USD">USD</option>
+                    <option value="KRW" selected>KRW</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="JPY">JPY</option>
+                  </select>
+                  <input type="number" id="minDistributionAmount" value="1000" placeholder="최소금액">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 네비게이션 버튼 -->
+    <div class="navigation">
+      <button class="btn btn-prev" style="visibility: hidden;">이전</button>
+      <button class="btn btn-next">다음</button>
+      <button class="btn btn-save" style="display: none;">저장</button>
+    </div>
+  </div>
+</body>
+</html>
+
+// 자산 등록 

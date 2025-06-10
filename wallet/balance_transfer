@@ -1,0 +1,237 @@
+import React, { useState } from 'react';
+
+const BalanceTransferModal = ({ account = {
+  id: '',
+  customerName: '',
+  accountNumber: '',
+  wallets: {
+    issue: '0x1234...5678',
+    distribution: '0x8765...4321'
+  }
+}, onClose = () => {}, onSubmit = () => {} }) => {
+  const [formData, setFormData] = useState({
+    sourceWalletType: 'issue',
+    tokenType: '',
+    destinationWallet: '',
+    amount: '',
+    transferAll: false
+  });
+
+  // 샘플 데이터
+  const availableTokens = [
+    { type: 'overseas_music', name: '해외음악IP', balance: 1000 },
+    { type: 'ev_charging', name: 'EV충전', balance: 500 },
+    { type: 'renewable_energy', name: '신재생에너지', balance: 750 },
+    { type: 'dt', name: 'DT', balance: 300 }
+  ];
+
+  const [showWalletSearch, setShowWalletSearch] = useState(false);
+  const maxAmount = formData.tokenType ? 
+    availableTokens.find(t => t.type === formData.tokenType)?.balance || 0 : 0;
+
+  const handleSubmit = () => {
+    onSubmit({
+      accountId: account.id,
+      ...formData,
+      amount: formData.transferAll ? maxAmount : Number(formData.amount)
+    });
+  };
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+    if (!value || (Number(value) >= 0 && Number(value) <= maxAmount)) {
+      setFormData({ ...formData, amount: value });
+    }
+  };
+
+  const handleTransferAllChange = (e) => {
+    const checked = e.target.checked;
+    setFormData({
+      ...formData,
+      transferAll: checked,
+      amount: checked ? maxAmount.toString() : ''
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg w-full max-w-xl">
+        {/* 헤더 */}
+        <div className="p-6 border-b">
+          <h2 className="text-xl font-bold mb-4">잔고 이동</h2>
+          {/* 고객 정보 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-600">고객명</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-gray-100 border rounded-md"
+                value={account.customerName}
+                disabled
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">계좌번호</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-gray-100 border rounded-md"
+                value={account.accountNumber}
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 본문 */}
+        <div className="p-6 space-y-6">
+          {/* 출고할 지갑 유형 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">출고할 지갑 유형</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="issue"
+                  checked={formData.sourceWalletType === 'issue'}
+                  onChange={(e) => setFormData({...formData, sourceWalletType: e.target.value})}
+                  className="form-radio"
+                />
+                <span>발행</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="distribution"
+                  checked={formData.sourceWalletType === 'distribution'}
+                  onChange={(e) => setFormData({...formData, sourceWalletType: e.target.value})}
+                  className="form-radio"
+                />
+                <span>유통</span>
+              </label>
+            </div>
+            <input
+              type="text"
+              className="w-full px-3 py-2 bg-gray-100 border rounded-md font-mono"
+              value={account.wallets[formData.sourceWalletType]}
+              disabled
+            />
+          </div>
+
+          {/* 이동할 토큰 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">이동할 토큰</label>
+            <select
+              className="w-full px-3 py-2 border rounded-md"
+              value={formData.tokenType}
+              onChange={(e) => setFormData({...formData, tokenType: e.target.value})}
+            >
+              <option value="">토큰 선택</option>
+              {availableTokens.map(token => (
+                <option key={token.type} value={token.type}>{token.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* 입고할 지갑 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">입고할 지갑</label>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                className="flex-1 px-3 py-2 bg-gray-100 border rounded-md font-mono"
+                value={formData.destinationWallet}
+                disabled
+                placeholder="입고할 지갑 주소"
+              />
+              <button
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                onClick={() => setShowWalletSearch(true)}
+              >
+                찾아보기
+              </button>
+            </div>
+          </div>
+
+          {/* 이동 수량 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">이동 수량</label>
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 space-y-1">
+                <input
+                  type="number"
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="이동할 토큰 수량 입력"
+                  value={formData.amount}
+                  onChange={handleAmountChange}
+                  disabled={formData.transferAll}
+                />
+                <p className="text-sm text-gray-500">
+                  이동 가능 수량: {maxAmount.toLocaleString()}개
+                </p>
+              </div>
+              <label className="flex items-center whitespace-nowrap space-x-2">
+                <input
+                  type="checkbox"
+                  checked={formData.transferAll}
+                  onChange={handleTransferAllChange}
+                  className="form-checkbox"
+                />
+                <span>전량 이동</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div className="p-6 border-t flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 border rounded-md hover:bg-gray-50"
+            onClick={onClose}
+          >
+            취소
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            onClick={handleSubmit}
+          >
+            확인
+          </button>
+        </div>
+
+        {/* 지갑 검색 모달 */}
+        {showWalletSearch && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96">
+              <h3 className="text-lg font-bold mb-4">입고 지갑 선택</h3>
+              <div className="space-y-4">
+                {/* 샘플 지갑 목록 */}
+                <div className="space-y-2">
+                  {['0xabcd...1234', '0xefgh...5678', '0xijkl...9012'].map(wallet => (
+                    <button
+                      key={wallet}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 rounded-md"
+                      onClick={() => {
+                        setFormData({...formData, destinationWallet: wallet});
+                        setShowWalletSearch(false);
+                      }}
+                    >
+                      {wallet}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                  onClick={() => setShowWalletSearch(false)}
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default BalanceTransferModal;
